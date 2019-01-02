@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.tt.kafka.util.Constants.*;
 
 /**
  * @Author: Tboy
@@ -38,8 +37,8 @@ public abstract class NettyTcpServer  {
         this.bossNum = bossNum;
         this.workerNum = workerNum;
         bootstrap = new ServerBootstrap();
-        bossGroup = new NioEventLoopGroup(this.getBossNum() == 0 ? 1 : this.getBossNum());
-        workGroup = new NioEventLoopGroup(this.getWorkerNum() == 0 ? (CPU_SIZE << 1) : this.getWorkerNum());
+        bossGroup = new NioEventLoopGroup(this.getBossNum());
+        workGroup = new NioEventLoopGroup(this.getWorkerNum());
         initTcpOptions(bootstrap);
     }
 

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
+
 /**
  * @Author: Tboy
  */
@@ -20,8 +21,6 @@ public class PushServerConfigs {
     private static final String CONFIG_FILE = "push_server.properties";
 
     private final Properties properties;
-
-    private int port = 0;
 
     public PushServerConfigs(){
         this.properties = new Properties();
@@ -55,11 +54,18 @@ public class PushServerConfigs {
         }
     }
 
+    public int getBossNum(){
+        String port = System.getProperty(Constants.PUSH_SERVER_BOSS_NUM, properties.getProperty(Constants.PUSH_SERVER_BOSS_NUM, "10666"));
+        return Integer.valueOf(port);
+    }
+
+    public int getWorkerNum(){
+        String port = System.getProperty(Constants.PUSH_SERVER_WORKER_NUM, properties.getProperty(Constants.PUSH_SERVER_WORKER_NUM, String.valueOf(Constants.CPU_SIZE)));
+        return Integer.valueOf(port);
+    }
+
     public int getPort() {
-        if(port != 0){
-            return port;
-        }
-        port = Integer.valueOf(System.getProperty(Constants.PUSH_SERVER_PORT, properties.getProperty(Constants.PUSH_SERVER_PORT, "10666")));
-        return port;
+        String port = System.getProperty(Constants.PUSH_SERVER_PORT, properties.getProperty(Constants.PUSH_SERVER_PORT, "10666"));
+        return Integer.valueOf(port);
     }
 }

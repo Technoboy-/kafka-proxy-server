@@ -5,11 +5,8 @@ import com.tt.kafka.netty.protocol.Command;
 import com.tt.kafka.netty.protocol.Header;
 import com.tt.kafka.netty.protocol.Packet;
 import com.tt.kafka.netty.service.IdService;
-import com.tt.kafka.netty.transport.Connection;
 import com.tt.kafka.push.server.PushServerConfigs;
-import com.tt.kafka.push.server.TTKafkaPushServer;
-import com.tt.kafka.push.server.netty.LoadBalancePolicy;
-import com.tt.kafka.push.server.netty.RoundRobinPolicy;
+import com.tt.kafka.push.server.netty.PushTcpServer;
 import com.tt.kafka.serializer.SerializerImpl;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -24,18 +21,15 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
 
     private final PushServerConfigs configs;
 
-    private final TTKafkaPushServer pushServer;
-
-    private final LoadBalancePolicy loadBalancePolicy;
+    private final PushTcpServer pushTcpServer;
 
     private final IdService idService;
 
     public PushServerMessageListenerService(){
         this.configs = new PushServerConfigs();
         this.idService = new IdService();
-        this.pushServer = new TTKafkaPushServer(configs);
-        this.loadBalancePolicy = new RoundRobinPolicy(this.pushServer.getClientRegistry());
-        this.pushServer.start();
+        this.pushTcpServer = new PushTcpServer(configs);
+        this.pushTcpServer.start();
     }
 
     @Override
@@ -47,14 +41,12 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
         packet.setHeader(SerializerImpl.getFastJsonSerializer().serialize(header));
         packet.setKey(record.key());
         packet.setValue(record.value());
-        Connection connection = loadBalancePolicy.getConnection();
-        if(connection != null){
-            connection.send(packet);
-        }
+        //
+        pushTcpServer.push(packet);
     }
 
     @Override
     public void close() {
-        pushServer.close();
+        pushTcpServer.close();
     }
 }
