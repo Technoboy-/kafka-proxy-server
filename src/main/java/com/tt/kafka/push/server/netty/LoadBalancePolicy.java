@@ -5,7 +5,7 @@ import com.tt.kafka.netty.transport.Connection;
 /**
  * @Author: Tboy
  */
-public interface InvokePolicy {
+public interface LoadBalancePolicy {
 
     Connection getConnection();
 }

@@ -10,13 +10,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @Author: Tboy
  */
-public class LoadBalanceInvokePolicy implements InvokePolicy {
+public class RoundRobinPolicy implements LoadBalancePolicy {
 
     private final AtomicInteger index = new AtomicInteger(0);
 
     private final PushClientRegistry clientRegistry;
 
-    public LoadBalanceInvokePolicy(PushClientRegistry clientRegistry){
+    public RoundRobinPolicy(PushClientRegistry clientRegistry){
         this.clientRegistry = clientRegistry;
     }
 

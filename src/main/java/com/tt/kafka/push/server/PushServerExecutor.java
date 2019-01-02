@@ -11,7 +11,7 @@ import static com.tt.kafka.util.Constants.CPU_SIZE;
 /**
  * @Author: Tboy
  */
-public class PushServerExecutor {
+public class  PushServerExecutor {
 
     private static final int CORE_SIZE = CPU_SIZE << 1;
 

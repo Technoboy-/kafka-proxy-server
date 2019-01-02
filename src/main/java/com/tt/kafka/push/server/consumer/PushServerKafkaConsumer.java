@@ -1,4 +1,4 @@
-package com.tt.kafka.push.server;
+package com.tt.kafka.push.server.consumer;
 
 import com.tt.kafka.consumer.ConsumerConfig;
 import com.tt.kafka.consumer.exceptions.TopicNotExistException;
@@ -6,6 +6,7 @@ import com.tt.kafka.consumer.listener.MessageListener;
 import com.tt.kafka.consumer.service.MessageListenerService;
 import com.tt.kafka.metric.MonitorImpl;
 import com.tt.kafka.util.CollectionUtils;
+import com.tt.kafka.util.Preconditions;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
@@ -19,21 +20,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Author: Tboy
  */
 @SuppressWarnings("all")
-public class PushServerKafkaConsumerImpl<K, V> implements Runnable, com.tt.kafka.consumer.KafkaConsumer {
+public class PushServerKafkaConsumer<K, V> implements Runnable, com.tt.kafka.consumer.KafkaConsumer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PushServerKafkaConsumerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PushServerKafkaConsumer.class);
 
     private final AtomicBoolean start = new AtomicBoolean(false);
 
     private Consumer<byte[], byte[]> consumer;
 
-    private final Thread worker = new Thread(this, "consumer-poll-worker");
+    private final Thread worker = new Thread(this, "pusher-server-consumer-poll-worker");
 
     private final ConsumerConfig configs;
 
     private final MessageListenerService messageListenerService;
 
-    public PushServerKafkaConsumerImpl(ConsumerConfig configs) {
+    public PushServerKafkaConsumer(ConsumerConfig configs) {
         this.configs = configs;
 
         // KAFKA 0.11 later version.
@@ -44,18 +45,18 @@ public class PushServerKafkaConsumerImpl<K, V> implements Runnable, com.tt.kafka
         configs.put("group.id", configs.getGroupId());
 
         this.consumer = new KafkaConsumer(configs, new ByteArrayDeserializer(), new ByteArrayDeserializer());
-        this.messageListenerService = new PushServerMessageListenerServiceImpl();
+        this.messageListenerService = new PushServerMessageListenerService();
         
     }
 
     @Override
     public void setMessageListener(MessageListener messageListener) {
-        //NOP
+        throw new UnsupportedOperationException("not support MessageListener in push server");
     }
 
     public void start() {
 
-        boolean isAssignTopicPartition = !CollectionUtils.isEmpty(configs.getTopicPartitions());
+        Preconditions.checkArgument(CollectionUtils.isEmpty(configs.getTopicPartitions()), "topicPartition is not support in push server");
 
         if (start.compareAndSet(false, true)) {
             consumer.subscribe(Arrays.asList(configs.getTopic()), (ConsumerRebalanceListener) messageListenerService);
@@ -85,7 +86,7 @@ public class PushServerKafkaConsumerImpl<K, V> implements Runnable, com.tt.kafka
                     records = consumer.poll(configs.getPollTimeout());
                 }
             } catch (TopicNotExistException ex){
-                StringBuilder builder = new StringBuilder(100);
+                StringBuilder builder = new StringBuilder(150);
                 builder.append("topic not exist, will close the consumer instance in case of the scenario : ");
                 builder.append("using the same groupId for subscribe more than one topic, and one of the topic does not create in the broker, ");
                 builder.append("so it will cause the other one consumer in rebalance status for at least 5 minutes due to the kafka inner config.");
@@ -130,7 +131,6 @@ public class PushServerKafkaConsumerImpl<K, V> implements Runnable, com.tt.kafka
                 LOG.trace("Processing " + record);
             }
             MonitorImpl.getDefault().recordConsumeRecvCount(1);
-
             try {
                 messageListenerService.onMessage(record);
             } catch (Throwable ex) {

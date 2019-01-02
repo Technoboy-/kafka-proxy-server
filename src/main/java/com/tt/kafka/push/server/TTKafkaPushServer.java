@@ -27,8 +27,8 @@ public class TTKafkaPushServer extends NettyTcpServer {
 
     private ChannelHandler handler;
 
-    public TTKafkaPushServer(int port) {
-        super(port, bossNum, workerNum);
+    public TTKafkaPushServer(PushServerConfigs configs) {
+        super(configs.getPort(), bossNum, workerNum);
         registerHandler();
     }
 
