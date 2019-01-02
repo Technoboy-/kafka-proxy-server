@@ -8,11 +8,11 @@ import com.tt.kafka.netty.protocol.Packet;
 import com.tt.kafka.netty.transport.Connection;
 import com.tt.kafka.push.server.PushServerConfigs;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
+import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+
+import java.util.concurrent.BlockingQueue;
 
 
 /**
@@ -22,15 +22,18 @@ public class PushTcpServer extends NettyTcpServer {
 
     private final PushClientRegistry clientRegistry;
 
-    private final LoadBalancePolicy loadBalancePolicy;
+    private final LoadBalancePolicy<Connection> loadBalancePolicy;
 
     private final ChannelHandler handler;
+
+    private final RetryPolicy retryPolicy;
 
     public PushTcpServer(PushServerConfigs configs) {
         super(configs.getPort(), configs.getBossNum(), configs.getWorkerNum());
         this.clientRegistry = new PushClientRegistry();
         this.loadBalancePolicy = new RoundRobinPolicy(clientRegistry);
         this.handler = new PushServerHandler(newDispatcher());
+        this.retryPolicy = new DefaultRetryPolicy(Integer.MAX_VALUE, 30);
     }
 
     private MessageDispatcher newDispatcher(){
@@ -59,11 +62,21 @@ public class PushTcpServer extends NettyTcpServer {
         pipeline.addLast("handler", getChannelHandler());
     }
 
-    public void push(Packet packet){
-        Connection connection = loadBalancePolicy.getConnection();
-        if(connection != null){
-            connection.send(packet);
+    public void push(Packet packet, BlockingQueue<Packet> retryQueue) throws InterruptedException{
+        retryPolicy.reset();
+        Connection connection = loadBalancePolicy.get();
+        while(connection == null && retryPolicy.allowRetry()){
+            connection = loadBalancePolicy.get();
         }
+        //
+        connection.send(packet, new ChannelFutureListener(){
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if(!future.isSuccess()){
+                    retryQueue.put(packet);
+                }
+            }
+        });
     }
 
     public PushClientRegistry getClientRegistry() {

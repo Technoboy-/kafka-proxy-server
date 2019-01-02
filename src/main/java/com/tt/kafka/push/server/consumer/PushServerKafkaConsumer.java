@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Author: Tboy
  */
 @SuppressWarnings("all")
-public class PushServerKafkaConsumer<K, V> implements Runnable, com.tt.kafka.consumer.KafkaConsumer {
+public class PushServerKafkaConsumer<K, V> implements Runnable{
 
     private static final Logger LOG = LoggerFactory.getLogger(PushServerKafkaConsumer.class);
 
@@ -28,11 +28,11 @@ public class PushServerKafkaConsumer<K, V> implements Runnable, com.tt.kafka.con
 
     private Consumer<byte[], byte[]> consumer;
 
-    private final Thread worker = new Thread(this, "pusher-server-consumer-poll-worker");
+    private final Thread worker = new Thread(this, "consumer-poll-worker");
 
     private final ConsumerConfig configs;
 
-    private final MessageListenerService messageListenerService;
+    private MessageListenerService messageListenerService;
 
     public PushServerKafkaConsumer(ConsumerConfig configs) {
         this.configs = configs;
@@ -45,18 +45,16 @@ public class PushServerKafkaConsumer<K, V> implements Runnable, com.tt.kafka.con
         configs.put("group.id", configs.getGroupId());
 
         this.consumer = new KafkaConsumer(configs, new ByteArrayDeserializer(), new ByteArrayDeserializer());
-        this.messageListenerService = new PushServerMessageListenerService();
-        
     }
 
-    @Override
-    public void setMessageListener(MessageListener messageListener) {
-        throw new UnsupportedOperationException("not support MessageListener in push server");
+    public void setMessageListenerService(MessageListenerService messageListenerService){
+        this.messageListenerService = messageListenerService;
     }
 
     public void start() {
 
         Preconditions.checkArgument(CollectionUtils.isEmpty(configs.getTopicPartitions()), "topicPartition is not support in push server");
+        Preconditions.checkArgument(messageListenerService != null, "MessageListenerService is null");
 
         if (start.compareAndSet(false, true)) {
             consumer.subscribe(Arrays.asList(configs.getTopic()), (ConsumerRebalanceListener) messageListenerService);
@@ -135,6 +133,7 @@ public class PushServerKafkaConsumer<K, V> implements Runnable, com.tt.kafka.con
                 messageListenerService.onMessage(record);
             } catch (Throwable ex) {
                 LOG.error("onMessage error", ex);
+                close();
             }
         }
     }

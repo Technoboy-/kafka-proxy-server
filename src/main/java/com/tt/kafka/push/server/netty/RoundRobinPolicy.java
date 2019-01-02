@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @Author: Tboy
  */
-public class RoundRobinPolicy implements LoadBalancePolicy {
+public class RoundRobinPolicy implements LoadBalancePolicy<Connection> {
 
     private final AtomicInteger index = new AtomicInteger(0);
 
@@ -21,7 +21,7 @@ public class RoundRobinPolicy implements LoadBalancePolicy {
     }
 
     @Override
-    public Connection getConnection() {
+    public Connection get() {
         Collection<Connection> values = clientRegistry.getClients();
         List<Connection> clients = new ArrayList<>(values);
         if(clients.size() <= 0){

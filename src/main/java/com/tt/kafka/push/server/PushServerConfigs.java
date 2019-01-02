@@ -55,17 +55,54 @@ public class PushServerConfigs {
     }
 
     public int getBossNum(){
-        String port = System.getProperty(Constants.PUSH_SERVER_BOSS_NUM, properties.getProperty(Constants.PUSH_SERVER_BOSS_NUM, "10666"));
-        return Integer.valueOf(port);
+        String bossNum = System.getProperty(Constants.PUSH_SERVER_BOSS_NUM, properties.getProperty(Constants.PUSH_SERVER_BOSS_NUM));
+        return Integer.getInteger(bossNum, 1);
     }
 
     public int getWorkerNum(){
-        String port = System.getProperty(Constants.PUSH_SERVER_WORKER_NUM, properties.getProperty(Constants.PUSH_SERVER_WORKER_NUM, String.valueOf(Constants.CPU_SIZE)));
-        return Integer.valueOf(port);
+        String workerNum = System.getProperty(Constants.PUSH_SERVER_WORKER_NUM, properties.getProperty(Constants.PUSH_SERVER_WORKER_NUM));
+        return Integer.getInteger(workerNum, Constants.CPU_SIZE);
     }
 
     public int getPort() {
-        String port = System.getProperty(Constants.PUSH_SERVER_PORT, properties.getProperty(Constants.PUSH_SERVER_PORT, "10666"));
-        return Integer.valueOf(port);
+        String port = System.getProperty(Constants.PUSH_SERVER_PORT, properties.getProperty(Constants.PUSH_SERVER_PORT));
+        return Integer.getInteger(port, 10666);
     }
+
+    public String getGroupId() {
+        return System.getProperty(Constants.PUSH_SERVER_GROUP_ID, properties.getProperty(Constants.PUSH_SERVER_GROUP_ID));
+    }
+
+    public String getKafkaServerList() {
+        return System.getProperty(Constants.PUSH_SERVER_KAFKA_SERVER_LIST, properties.getProperty(Constants.PUSH_SERVER_KAFKA_SERVER_LIST));
+    }
+
+    public String getZookeeperServerList(){
+        return System.getProperty(Constants.ZOOKEEPER_SERVER_LIST, properties.getProperty(Constants.ZOOKEEPER_SERVER_LIST));
+    }
+
+    public String getZookeeperNamespace(){
+        return System.getProperty(Constants.ZOOKEEPER_NAMESPACE, properties.getProperty(Constants.ZOOKEEPER_NAMESPACE, "push_server"));
+    }
+
+    public int getZookeeperSessionTimeoutMs(){
+        String sessionTimeoutMs = System.getProperty(Constants.ZOOKEEPER_SESSION_TIMEOUT_MS, properties.getProperty(Constants.ZOOKEEPER_SESSION_TIMEOUT_MS));
+        return Integer.getInteger(sessionTimeoutMs, 60 * 1000);
+    }
+
+    public int getZookeeperConnectionTimeoutMs(){
+        String connectionTimeoutMs =  System.getProperty(Constants.ZOOKEEPER_CONNECTION_TIMEOUT_MS, properties.getProperty(Constants.ZOOKEEPER_CONNECTION_TIMEOUT_MS));
+        return Integer.getInteger(connectionTimeoutMs, 15 * 1000);
+    }
+
+    public String getZookeeperTopic(){
+        return System.getProperty(Constants.ZOOKEEPER_TOPIC, properties.getProperty(Constants.ZOOKEEPER_TOPIC));
+    }
+
+    public int getPushServerQueueSize(){
+        String queueSize = System.getProperty(Constants.PUSH_SERVER_QUEUE_SIZE, properties.getProperty(Constants.PUSH_SERVER_QUEUE_SIZE));
+        return Integer.getInteger(queueSize, 100);
+    }
+
+
 }
