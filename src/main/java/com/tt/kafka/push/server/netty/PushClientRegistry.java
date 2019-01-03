@@ -1,6 +1,6 @@
 package com.tt.kafka.push.server.netty;
 
-import com.tt.kafka.netty.transport.Connection;
+import com.tt.kafka.client.netty.transport.Connection;
 import io.netty.channel.ChannelId;
 
 import java.util.Collection;

@@ -1,5 +1,6 @@
 package com.tt.kafka.push.server;
 
+import com.tt.kafka.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,10 +80,6 @@ public class PushServerConfigs {
 
     public String getZookeeperServerList(){
         return System.getProperty(Constants.ZOOKEEPER_SERVER_LIST, properties.getProperty(Constants.ZOOKEEPER_SERVER_LIST));
-    }
-
-    public String getZookeeperNamespace(){
-        return System.getProperty(Constants.ZOOKEEPER_NAMESPACE, properties.getProperty(Constants.ZOOKEEPER_NAMESPACE, "push_server"));
     }
 
     public int getZookeeperSessionTimeoutMs(){

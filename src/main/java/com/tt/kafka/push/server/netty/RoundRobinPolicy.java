@@ -1,6 +1,7 @@
 package com.tt.kafka.push.server.netty;
 
-import com.tt.kafka.netty.transport.Connection;
+import com.tt.kafka.client.netty.transport.Connection;
+import com.tt.kafka.client.service.LoadBalancePolicy;
 
 import java.util.ArrayList;
 import java.util.Collection;

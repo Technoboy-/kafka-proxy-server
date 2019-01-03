@@ -1,8 +1,8 @@
 package com.tt.kafka.push.server.netty;
 
-import com.tt.kafka.netty.handler.CommonMessageHandler;
-import com.tt.kafka.netty.protocol.Packet;
-import com.tt.kafka.netty.transport.Connection;
+import com.tt.kafka.client.netty.handler.CommonMessageHandler;
+import com.tt.kafka.client.netty.protocol.Packet;
+import com.tt.kafka.client.netty.transport.Connection;
 import com.tt.kafka.push.server.PushServerExecutor;
 import com.tt.kafka.util.NetUtils;
 import org.slf4j.Logger;

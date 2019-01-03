@@ -1,6 +1,7 @@
 package com.tt.kafka.push.server.zookeeper;
 
 import com.tt.kafka.push.server.PushServerConfigs;
+import com.tt.kafka.util.Constants;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorEvent;
@@ -18,7 +19,7 @@ public class ZookeeperClient {
 
     public ZookeeperClient(PushServerConfigs serverConfigs){
         this.client = CuratorFrameworkFactory.builder()
-                .namespace(serverConfigs.getZookeeperNamespace())
+                .namespace(Constants.ZOOKEEPER_NAMESPACE)
                 .connectString(serverConfigs.getZookeeperServerList())
                 .retryPolicy(new ExponentialBackoffRetry(1000, 3))
                 .sessionTimeoutMs(serverConfigs.getZookeeperSessionTimeoutMs())
