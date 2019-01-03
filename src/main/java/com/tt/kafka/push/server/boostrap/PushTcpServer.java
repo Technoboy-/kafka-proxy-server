@@ -1,13 +1,19 @@
-package com.tt.kafka.push.server.netty;
+package com.tt.kafka.push.server.boostrap;
 
+import com.tt.kafka.client.PushConfigs;
 import com.tt.kafka.client.netty.codec.PacketDecoder;
 import com.tt.kafka.client.netty.codec.PacketEncoder;
 import com.tt.kafka.client.netty.handler.MessageDispatcher;
 import com.tt.kafka.client.netty.protocol.Command;
 import com.tt.kafka.client.netty.protocol.Packet;
 import com.tt.kafka.client.netty.transport.Connection;
+import com.tt.kafka.client.service.Address;
 import com.tt.kafka.client.service.LoadBalancePolicy;
-import com.tt.kafka.push.server.PushServerConfigs;
+import com.tt.kafka.client.service.RegisterMetadata;
+import com.tt.kafka.client.service.RegistryService;
+import com.tt.kafka.push.server.netty.*;
+import com.tt.kafka.util.Constants;
+import com.tt.kafka.util.NetUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -29,8 +35,14 @@ public class PushTcpServer extends NettyTcpServer {
 
     private final RetryPolicy retryPolicy;
 
-    public PushTcpServer(PushServerConfigs configs) {
-        super(configs.getPort(), configs.getBossNum(), configs.getWorkerNum());
+    private final PushConfigs serverConfigs;
+
+    private final RegistryService registryService;
+
+    public PushTcpServer(PushConfigs configs) {
+        super(configs.getServerPort(), configs.getServerBossNum(), configs.getServerWorkerNum());
+        this.serverConfigs = configs;
+        this.registryService = new RegistryService(serverConfigs);
         this.clientRegistry = new PushClientRegistry();
         this.loadBalancePolicy = new RoundRobinPolicy(clientRegistry);
         this.handler = new PushServerHandler(newDispatcher());
@@ -50,6 +62,15 @@ public class PushTcpServer extends NettyTcpServer {
         bootstrap.option(ChannelOption.SO_BACKLOG, 1024)
                 .option(ChannelOption.SO_SNDBUF, 64 * 1024) //64k
                 .option(ChannelOption.SO_RCVBUF, 64 * 1024); //64k
+    }
+
+    @Override
+    protected void afterStart() {
+        Address address = new Address(NetUtils.getLocalIp(), serverConfigs.getServerPort());
+        RegisterMetadata registerMetadata = new RegisterMetadata();
+        registerMetadata.setPath(String.format(Constants.ZOOKEEPER_PROVIDERS, serverConfigs.getServerTopic()));
+        registerMetadata.setAddress(address);
+        this.registryService.register(registerMetadata);
     }
 
     protected void initNettyChannel(NioSocketChannel ch) throws Exception{

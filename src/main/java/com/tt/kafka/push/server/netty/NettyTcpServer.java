@@ -59,8 +59,11 @@ public abstract class NettyTcpServer  {
                 LOGGER.error("NettyTcpServer bind fail, exit");
                 System.exit(1);
             }
+            afterStart();
         }
     }
+
+    protected abstract void afterStart();
 
     private void initNettyChannel(){
         bootstrap.group(bossGroup, workGroup)

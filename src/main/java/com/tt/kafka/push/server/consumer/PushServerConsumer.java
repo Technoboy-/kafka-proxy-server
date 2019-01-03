@@ -2,7 +2,6 @@ package com.tt.kafka.push.server.consumer;
 
 import com.tt.kafka.consumer.ConsumerConfig;
 import com.tt.kafka.consumer.exceptions.TopicNotExistException;
-import com.tt.kafka.consumer.listener.MessageListener;
 import com.tt.kafka.consumer.service.MessageListenerService;
 import com.tt.kafka.metric.MonitorImpl;
 import com.tt.kafka.util.CollectionUtils;
@@ -20,9 +19,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Author: Tboy
  */
 @SuppressWarnings("all")
-public class PushServerKafkaConsumer<K, V> implements Runnable{
+public class PushServerConsumer<K, V> implements Runnable{
 
-    private static final Logger LOG = LoggerFactory.getLogger(PushServerKafkaConsumer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PushServerConsumer.class);
 
     private final AtomicBoolean start = new AtomicBoolean(false);
 
@@ -34,7 +33,7 @@ public class PushServerKafkaConsumer<K, V> implements Runnable{
 
     private MessageListenerService messageListenerService;
 
-    public PushServerKafkaConsumer(ConsumerConfig configs) {
+    public PushServerConsumer(ConsumerConfig configs) {
         this.configs = configs;
 
         // KAFKA 0.11 later version.

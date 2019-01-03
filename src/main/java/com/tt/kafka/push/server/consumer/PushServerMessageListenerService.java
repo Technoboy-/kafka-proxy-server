@@ -1,12 +1,12 @@
 package com.tt.kafka.push.server.consumer;
 
+import com.tt.kafka.client.PushConfigs;
 import com.tt.kafka.consumer.service.RebalanceMessageListenerService;
 import com.tt.kafka.client.netty.protocol.Command;
 import com.tt.kafka.client.netty.protocol.Header;
 import com.tt.kafka.client.netty.protocol.Packet;
 import com.tt.kafka.client.netty.service.IdService;
-import com.tt.kafka.push.server.PushServerConfigs;
-import com.tt.kafka.push.server.netty.PushTcpServer;
+import com.tt.kafka.push.server.boostrap.PushTcpServer;
 import com.tt.kafka.serializer.SerializerImpl;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -34,9 +34,9 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
 
     private final AtomicBoolean start = new AtomicBoolean(false);
 
-    public PushServerMessageListenerService(PushTcpServer pushTcpServer, PushServerConfigs serverConfigs){
-        this.queue = new LinkedBlockingQueue<>(serverConfigs.getPushServerQueueSize());
-        this.retryQueue = new LinkedBlockingQueue<>(serverConfigs.getPushServerQueueSize());
+    public PushServerMessageListenerService(PushTcpServer pushTcpServer, PushConfigs serverConfigs){
+        this.queue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
+        this.retryQueue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
         this.idService = new IdService();
         this.pushTcpServer = pushTcpServer;
         this.start.compareAndSet(false, true);
@@ -58,7 +58,6 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
     public void run() {
         while(this.start.get()){
             try {
-
                 Packet packet = retryQueue.peek();
                 if(packet != null){
                     retryQueue.poll();
