@@ -45,7 +45,7 @@ public class PushServerConfigs {
             LOGGER.error("error", ex);
         }
         if(fis == null){
-            throw new RuntimeException("push_server.properties not found");
+            throw new RuntimeException(CONFIG_FILE + " not found");
         }
         try {
             properties.load(fis);
