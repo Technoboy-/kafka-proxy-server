@@ -8,7 +8,7 @@ import com.tt.kafka.client.transport.handler.MessageDispatcher;
 import com.tt.kafka.client.transport.protocol.Command;
 import com.tt.kafka.client.transport.protocol.Packet;
 import com.tt.kafka.client.transport.Connection;
-import com.tt.kafka.client.service.LoadBalancePolicy;
+import com.tt.kafka.client.service.LoadBalance;
 import com.tt.kafka.client.service.RegisterMetadata;
 import com.tt.kafka.client.service.RegistryService;
 import com.tt.kafka.push.server.transport.*;
@@ -27,9 +27,7 @@ import java.util.concurrent.BlockingQueue;
  */
 public class PushTcpServer extends NettyTcpServer {
 
-    private final PushClientRegistry clientRegistry;
-
-    private final LoadBalancePolicy<Connection> loadBalancePolicy;
+    private final LoadBalance<Connection> loadBalance;
 
     private final ChannelHandler handler;
 
@@ -43,15 +41,14 @@ public class PushTcpServer extends NettyTcpServer {
         super(configs.getServerPort(), configs.getServerBossNum(), configs.getServerWorkerNum());
         this.serverConfigs = configs;
         this.registryService = new RegistryService(serverConfigs);
-        this.clientRegistry = new PushClientRegistry();
-        this.loadBalancePolicy = new RoundRobinPolicy(clientRegistry);
+        this.loadBalance = new RoundRobinLoadBalance();
         this.handler = new PushServerHandler(newDispatcher());
         this.retryPolicy = new DefaultRetryPolicy(Integer.MAX_VALUE, 30);
     }
 
     private MessageDispatcher newDispatcher(){
         MessageDispatcher dispatcher = new MessageDispatcher();
-        dispatcher.register(Command.LOGIN, new LoginHandler(clientRegistry));
+        dispatcher.register(Command.LOGIN, new LoginHandler());
         dispatcher.register(Command.HEARTBEAT, new HeartbeatHandler());
         dispatcher.register(Command.ACK, new AckHandler());
         return dispatcher;
@@ -86,9 +83,9 @@ public class PushTcpServer extends NettyTcpServer {
 
     public void push(Packet packet, BlockingQueue<Packet> retryQueue) throws InterruptedException{
         retryPolicy.reset();
-        Connection connection = loadBalancePolicy.get();
-        while(connection == null && retryPolicy.allowRetry()){
-            connection = loadBalancePolicy.get();
+        Connection connection = loadBalance.select(ClientRegistry.I.getCopyClients());
+        while((connection == null && retryPolicy.allowRetry()) || (!connection.isActive())){
+            connection = loadBalance.select(ClientRegistry.I.getCopyClients());
         }
         //
         connection.send(packet, new ChannelFutureListener(){
@@ -99,10 +96,6 @@ public class PushTcpServer extends NettyTcpServer {
                 }
             }
         });
-    }
-
-    public PushClientRegistry getClientRegistry() {
-        return clientRegistry;
     }
 
     @Override

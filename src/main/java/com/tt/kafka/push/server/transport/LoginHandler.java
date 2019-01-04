@@ -15,12 +15,6 @@ public class LoginHandler extends CommonMessageHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginHandler.class);
 
-    private final PushClientRegistry clientRegistry;
-
-    public LoginHandler(PushClientRegistry clientRegistry){
-        this.clientRegistry = clientRegistry;
-    }
-
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
         PushServerExecutor.EXECUTOR.execute(new LoginTask(connection, packet));
@@ -46,7 +40,7 @@ public class LoginHandler extends CommonMessageHandler {
                 response.setKey(new byte[0]);
                 response.setValue(new byte[0]);
                 connection.send(response);
-                clientRegistry.register(connection);
+                ClientRegistry.I.register(connection);
             } catch (Exception ex){
                 LOGGER.error("LoginTask error {}, close channel [ip:{}], ", ex, NetUtils.getRemoteAddress(connection.getChannel()));
                 connection.close();
