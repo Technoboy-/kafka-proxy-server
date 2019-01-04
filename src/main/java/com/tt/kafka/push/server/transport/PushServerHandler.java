@@ -1,8 +1,8 @@
-package com.tt.kafka.push.server.netty;
-import com.tt.kafka.client.netty.handler.MessageDispatcher;
-import com.tt.kafka.client.netty.protocol.Packet;
-import com.tt.kafka.client.netty.transport.Connection;
-import com.tt.kafka.client.netty.transport.NettyConnection;
+package com.tt.kafka.push.server.transport;
+import com.tt.kafka.client.transport.handler.MessageDispatcher;
+import com.tt.kafka.client.transport.protocol.Packet;
+import com.tt.kafka.client.transport.Connection;
+import com.tt.kafka.client.transport.NettyConnection;
 import com.tt.kafka.util.NetUtils;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;

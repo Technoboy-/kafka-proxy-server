@@ -2,10 +2,10 @@ package com.tt.kafka.push.server.consumer;
 
 import com.tt.kafka.client.PushConfigs;
 import com.tt.kafka.consumer.service.RebalanceMessageListenerService;
-import com.tt.kafka.client.netty.protocol.Command;
-import com.tt.kafka.client.netty.protocol.Header;
-import com.tt.kafka.client.netty.protocol.Packet;
-import com.tt.kafka.client.netty.service.IdService;
+import com.tt.kafka.client.transport.protocol.Command;
+import com.tt.kafka.client.transport.protocol.Header;
+import com.tt.kafka.client.transport.protocol.Packet;
+import com.tt.kafka.client.service.IdService;
 import com.tt.kafka.push.server.boostrap.PushTcpServer;
 import com.tt.kafka.serializer.SerializerImpl;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

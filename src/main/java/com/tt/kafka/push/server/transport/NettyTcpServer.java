@@ -1,4 +1,4 @@
-package com.tt.kafka.push.server.netty;
+package com.tt.kafka.push.server.transport;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
