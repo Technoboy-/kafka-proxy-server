@@ -26,8 +26,6 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
 
     private final LinkedBlockingQueue<Packet> retryQueue;
 
-    private final IdService idService;
-
     private final PushTcpServer pushTcpServer;
 
     private final Thread worker;
@@ -37,7 +35,6 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
     public PushServerMessageListenerService(PushTcpServer pushTcpServer, PushConfigs serverConfigs){
         this.queue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
         this.retryQueue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
-        this.idService = new IdService();
         this.pushTcpServer = pushTcpServer;
         this.start.compareAndSet(false, true);
         this.worker = new Thread(this,"push-worker");
@@ -66,7 +63,7 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
                     packet = new Packet();
                     //
                     packet.setCmd(Command.PUSH.getCmd());
-                    packet.setMsgId(idService.getId());
+                    packet.setMsgId(IdService.I.getId());
                     Header header = new Header(record.topic(), record.partition(), record.offset());
                     packet.setHeader(SerializerImpl.getFastJsonSerializer().serialize(header));
                     packet.setKey(record.key());

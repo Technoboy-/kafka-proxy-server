@@ -36,7 +36,7 @@ public class HeartbeatHandler extends CommonMessageHandler {
                 Packet ack = new Packet();
                 ack.setVersion(packet.getVersion());
                 ack.setMsgId(packet.getMsgId());
-                ack.setCmd(Command.HEARTBEAT_ACK.getCmd());
+                ack.setCmd(Command.HEARTBEAT.getCmd());
                 ack.setHeader(new byte[0]);
                 ack.setKey(new byte[0]);
                 ack.setValue(new byte[0]);

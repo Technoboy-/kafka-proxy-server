@@ -1,6 +1,7 @@
 package com.tt.kafka.push.server.boostrap;
 
 import com.tt.kafka.client.PushConfigs;
+import com.tt.kafka.client.service.*;
 import com.tt.kafka.client.transport.Address;
 import com.tt.kafka.client.transport.codec.PacketDecoder;
 import com.tt.kafka.client.transport.codec.PacketEncoder;
@@ -8,10 +9,8 @@ import com.tt.kafka.client.transport.handler.MessageDispatcher;
 import com.tt.kafka.client.transport.protocol.Command;
 import com.tt.kafka.client.transport.protocol.Packet;
 import com.tt.kafka.client.transport.Connection;
-import com.tt.kafka.client.service.LoadBalance;
-import com.tt.kafka.client.service.RegisterMetadata;
-import com.tt.kafka.client.service.RegistryService;
 import com.tt.kafka.push.server.transport.*;
+import com.tt.kafka.push.server.transport.RoundRobinLoadBalance;
 import com.tt.kafka.util.Constants;
 import com.tt.kafka.util.NetUtils;
 import io.netty.bootstrap.ServerBootstrap;
@@ -43,12 +42,11 @@ public class PushTcpServer extends NettyTcpServer {
         this.registryService = new RegistryService(serverConfigs);
         this.loadBalance = new RoundRobinLoadBalance();
         this.handler = new PushServerHandler(newDispatcher());
-        this.retryPolicy = new DefaultRetryPolicy(Integer.MAX_VALUE, 30);
+        this.retryPolicy = new DefaultRetryPolicy();
     }
 
     private MessageDispatcher newDispatcher(){
         MessageDispatcher dispatcher = new MessageDispatcher();
-        dispatcher.register(Command.LOGIN, new LoginHandler());
         dispatcher.register(Command.HEARTBEAT, new HeartbeatHandler());
         dispatcher.register(Command.ACK, new AckHandler());
         return dispatcher;
