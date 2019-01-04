@@ -21,7 +21,7 @@ public class DefaultRetryPolicy implements RetryPolicy {
     public boolean allowRetry() throws InterruptedException{
         if(retryCount > 0){
             Thread.sleep(retryPeriod);
-            retryPeriod--;
+            retryCount--;
             return true;
         }
         return false;
