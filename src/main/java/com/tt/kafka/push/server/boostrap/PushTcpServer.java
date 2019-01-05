@@ -84,21 +84,14 @@ public class PushTcpServer extends NettyTcpServer {
         pipeline.addLast("handler", getChannelHandler());
     }
 
-    public void push(Packet packet, BlockingQueue<Packet> retryQueue) throws InterruptedException{
+    public void push(Packet packet, final ChannelFutureListener listener) throws InterruptedException{
         retryPolicy.reset();
         Connection connection = loadBalance.select(ClientRegistry.I.getCopyClients());
         while((connection == null && retryPolicy.allowRetry()) || (!connection.isActive())){
             connection = loadBalance.select(ClientRegistry.I.getCopyClients());
         }
         //
-        connection.send(packet, new ChannelFutureListener(){
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                if(!future.isSuccess()){
-                    retryQueue.put(packet);
-                }
-            }
-        });
+        connection.send(packet, listener);
     }
 
     @Override

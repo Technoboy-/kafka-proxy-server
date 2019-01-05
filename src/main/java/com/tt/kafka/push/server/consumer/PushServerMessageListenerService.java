@@ -7,7 +7,10 @@ import com.tt.kafka.client.transport.protocol.Header;
 import com.tt.kafka.client.transport.protocol.Packet;
 import com.tt.kafka.client.service.IdService;
 import com.tt.kafka.push.server.boostrap.PushTcpServer;
+import com.tt.kafka.push.server.transport.MemoryQueue;
 import com.tt.kafka.serializer.SerializerImpl;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +25,7 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PushServerMessageListenerService.class);
 
-    private final LinkedBlockingQueue<ConsumerRecord<byte[], byte[]>> queue;
+    private final LinkedBlockingQueue<ConsumerRecord<byte[], byte[]>> pushQueue;
 
     private final LinkedBlockingQueue<Packet> retryQueue;
 
@@ -33,7 +36,7 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
     private final AtomicBoolean start = new AtomicBoolean(false);
 
     public PushServerMessageListenerService(PushTcpServer pushTcpServer, PushConfigs serverConfigs){
-        this.queue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
+        this.pushQueue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
         this.retryQueue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
         this.pushTcpServer = pushTcpServer;
         this.start.compareAndSet(false, true);
@@ -45,7 +48,7 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
     @Override
     public void onMessage(ConsumerRecord<byte[], byte[]> record) {
         try {
-            queue.put(record);
+            pushQueue.put(record);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -59,7 +62,7 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
                 if(packet != null){
                     retryQueue.poll();
                 } else{
-                    ConsumerRecord<byte[], byte[]> record = queue.take();
+                    ConsumerRecord<byte[], byte[]> record = pushQueue.take();
                     packet = new Packet();
                     //
                     packet.setCmd(Command.PUSH.getCmd());
@@ -70,7 +73,17 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
                     packet.setValue(record.value());
                     //
                 }
-                pushTcpServer.push(packet, retryQueue);
+                final Packet one = packet;
+                pushTcpServer.push(one, new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) throws Exception {
+                        if(future.isSuccess()){
+                            MemoryQueue.ackQueue.put(one);
+                        } else {
+                            retryQueue.put(one);
+                        }
+                    }
+                });
             } catch (InterruptedException ex) {
                 LOGGER.error("InterruptedException", ex);
             }
