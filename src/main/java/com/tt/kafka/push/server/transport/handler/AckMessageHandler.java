@@ -17,7 +17,8 @@ public class AckMessageHandler extends CommonMessageHandler {
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
         LOGGER.debug("received ack msgId : {}", packet.getMsgId());
+        LOGGER.debug("before ack, queue size: {}", MemoryQueue.ackQueue.size());
         MemoryQueue.ackQueue.remove(packet);
-        LOGGER.debug("ackQueue size : {}", MemoryQueue.ackQueue.size());
+        LOGGER.debug("after ack, queue size : {}", MemoryQueue.ackQueue.size());
     }
 }
