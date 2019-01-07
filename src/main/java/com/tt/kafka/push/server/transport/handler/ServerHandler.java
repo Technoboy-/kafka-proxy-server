@@ -26,23 +26,20 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        NettyConnection.attachChannel(ctx.channel(), false);
+        NettyConnection.attachChannel(ctx.channel());
     }
 
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        Connection connnection = NettyConnection.attachChannel(ctx.channel(), false);
+        Connection connnection = NettyConnection.attachChannel(ctx.channel());
         ClientRegistry.I.unregister(connnection);
         connnection.close();
     }
 
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        dispatcher.dispatch(NettyConnection.attachChannel(ctx.channel(), false), (Packet)msg);
+        dispatcher.dispatch(NettyConnection.attachChannel(ctx.channel()), (Packet)msg);
     }
 
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Connection connnection = NettyConnection.attachChannel(ctx.channel(), false);
-        ClientRegistry.I.unregister(connnection);
-        LOGGER.error("clientId : {} get exception {} , close channel [ip:{}]",  new Object[]{connnection, cause, NetUtils.getRemoteAddress(ctx.channel())});
-        ctx.close();
+        LOGGER.error("exceptionCaught", cause);
     }
 }

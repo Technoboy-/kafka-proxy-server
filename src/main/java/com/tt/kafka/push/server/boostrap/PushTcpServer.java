@@ -14,6 +14,7 @@ import com.tt.kafka.push.server.transport.RoundRobinLoadBalance;
 import com.tt.kafka.push.server.transport.handler.AckMessageHandler;
 import com.tt.kafka.push.server.transport.handler.HeartbeatMessageHandler;
 import com.tt.kafka.push.server.transport.handler.ServerHandler;
+import com.tt.kafka.push.server.transport.handler.UnregisterMessageHandler;
 import com.tt.kafka.util.Constants;
 import com.tt.kafka.util.NetUtils;
 import io.netty.bootstrap.ServerBootstrap;
@@ -50,6 +51,7 @@ public class PushTcpServer extends NettyTcpServer {
     private MessageDispatcher newDispatcher(){
         MessageDispatcher dispatcher = new MessageDispatcher();
         dispatcher.register(Command.HEARTBEAT, new HeartbeatMessageHandler());
+        dispatcher.register(Command.UNREGISTER, new UnregisterMessageHandler());
         dispatcher.register(Command.ACK, new AckMessageHandler());
         return dispatcher;
     }
