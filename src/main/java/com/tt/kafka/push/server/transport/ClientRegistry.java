@@ -5,6 +5,7 @@ import com.tt.kafka.client.transport.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Author: Tboy
@@ -13,18 +14,18 @@ public class ClientRegistry {
 
     public static final ClientRegistry I = new ClientRegistry();
 
-    private final List<Connection> registry = new ArrayList<>();
+    private final ConcurrentHashMap<String, Connection> registry = new ConcurrentHashMap<>();
 
     public void register(Connection connection){
-        registry.add(connection);
+        registry.putIfAbsent(connection.getId().asLongText(), connection);
     }
 
     public void unregister(Connection connection){
-        registry.remove(connection);
+        registry.remove(connection.getId().asLongText());
     }
 
     public List<Connection> getCopyClients(){
-        return new ArrayList<>(registry);
+        return new ArrayList<>(registry.values());
     }
 
 }
