@@ -78,7 +78,7 @@ public class PushServerMessageListenerService<K, V> extends RebalanceMessageList
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {
                         if(future.isSuccess()){
-                            MemoryQueue.ackQueue.put(one);
+                            MemoryQueue.ackMap.put(one.getMsgId(), one);
                         } else {
                             retryQueue.put(one);
                         }

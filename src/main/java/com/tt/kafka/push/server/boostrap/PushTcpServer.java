@@ -9,6 +9,7 @@ import com.tt.kafka.client.transport.codec.PacketEncoder;
 import com.tt.kafka.client.transport.handler.MessageDispatcher;
 import com.tt.kafka.client.transport.protocol.Command;
 import com.tt.kafka.client.transport.protocol.Packet;
+import com.tt.kafka.push.server.consumer.PushServerConsumer;
 import com.tt.kafka.push.server.transport.ClientRegistry;
 import com.tt.kafka.push.server.transport.NettyTcpServer;
 import com.tt.kafka.push.server.transport.RoundRobinLoadBalance;
@@ -51,21 +52,23 @@ public class PushTcpServer extends NettyTcpServer {
 
     private ScheduledFuture<?> registerScheduledFuture;
 
-    public PushTcpServer(PushConfigs configs) {
+    private PushServerConsumer consumer;
+
+    public PushTcpServer(PushConfigs configs, PushServerConsumer consumer) {
         super(configs.getServerPort(), configs.getServerBossNum(), configs.getServerWorkerNum());
         this.serverConfigs = configs;
         this.registryService = new RegistryService(serverConfigs);
         this.loadBalance = new RoundRobinLoadBalance();
-        this.handler = new ServerHandler(newDispatcher());
+        this.handler = new ServerHandler(newDispatcher(consumer));
         this.retryPolicy = new DefaultRetryPolicy();
         this.executorService = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("register-zk-thread"));
     }
 
-    private MessageDispatcher newDispatcher(){
+    private MessageDispatcher newDispatcher(PushServerConsumer consumer){
         MessageDispatcher dispatcher = new MessageDispatcher();
         dispatcher.register(Command.HEARTBEAT, new HeartbeatMessageHandler());
         dispatcher.register(Command.UNREGISTER, new UnregisterMessageHandler());
-        dispatcher.register(Command.ACK, new AckMessageHandler());
+        dispatcher.register(Command.ACK, new AckMessageHandler(consumer, serverConfigs.getServerAutoCommitOffset()));
         return dispatcher;
     }
 
@@ -74,6 +77,10 @@ public class PushTcpServer extends NettyTcpServer {
         bootstrap.option(ChannelOption.SO_BACKLOG, 1024)
                 .option(ChannelOption.SO_SNDBUF, 64 * 1024) //64k
                 .option(ChannelOption.SO_RCVBUF, 64 * 1024); //64k
+    }
+
+    public void setConsumer(PushServerConsumer consumer) {
+        this.consumer = consumer;
     }
 
     @Override

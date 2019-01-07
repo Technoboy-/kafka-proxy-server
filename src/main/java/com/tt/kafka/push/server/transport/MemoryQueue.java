@@ -2,7 +2,7 @@ package com.tt.kafka.push.server.transport;
 
 import com.tt.kafka.client.transport.protocol.Packet;
 
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Author: jiwei.guo
@@ -10,5 +10,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class MemoryQueue {
 
-    public static final LinkedBlockingQueue<Packet> ackQueue = new LinkedBlockingQueue(1000);
+    public static MemoryQueue I = new MemoryQueue();
+
+    public static final ConcurrentHashMap<Long, Packet> ackMap = new ConcurrentHashMap(1000);
+
 }
