@@ -1,4 +1,4 @@
-package com.tt.kafka.push.server.transport;
+package com.tt.kafka.push.server.biz;
 
 import com.tt.kafka.client.transport.Connection;
 import com.tt.kafka.client.service.LoadBalance;

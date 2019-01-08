@@ -1,4 +1,4 @@
-package com.tt.kafka.push.server;
+package com.tt.kafka.push.server.biz;
 
 import com.tt.kafka.util.CallerWaitPolicy;
 import com.tt.kafka.util.Constants;
@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @Author: Tboy
  */
-public class  PushServerExecutor {
+public class BizExecutor {
 
     private static final int CORE_SIZE = Constants.CPU_SIZE << 1;
 

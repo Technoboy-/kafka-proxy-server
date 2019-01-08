@@ -1,6 +1,6 @@
 package com.tt.kafka.push.server.boostrap;
 
-import com.tt.kafka.client.PushConfigs;
+import com.tt.kafka.push.server.biz.PushServer;
 
 /**
  * @Author: Tboy
@@ -9,19 +9,12 @@ public class Bootstrap {
 
     public static void main(String[] args) {
         //
-        PushConfigs serverConfigs = new PushConfigs(true);
-
+        PushServer pushServer = new PushServer();
         //
-        PushTcpServer pushTcpServer = new PushTcpServer(serverConfigs);
-        pushTcpServer.start();
-        //
-        PushServer pushServer = new PushServer(serverConfigs);
-        pushServer.setPushTcpServer(pushTcpServer);
         pushServer.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             pushServer.close();
-            pushTcpServer.close();
         }));
     }
 

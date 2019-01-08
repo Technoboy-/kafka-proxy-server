@@ -1,11 +1,13 @@
 package com.tt.kafka.push.server.consumer;
 
+import com.tt.kafka.client.zookeeper.KafkaZookeeperConfig;
 import com.tt.kafka.consumer.ConsumerConfig;
 import com.tt.kafka.consumer.exceptions.TopicNotExistException;
 import com.tt.kafka.consumer.service.MessageListenerService;
 import com.tt.kafka.metric.MonitorImpl;
 import com.tt.kafka.util.CollectionUtils;
 import com.tt.kafka.util.Preconditions;
+import com.tt.kafka.util.StringUtils;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
@@ -19,9 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Author: Tboy
  */
 @SuppressWarnings("all")
-public class PushServerConsumer<K, V> implements Runnable{
+public class DefaultKafkaConsumerImpl<K, V> implements Runnable{
 
-    private static final Logger LOG = LoggerFactory.getLogger(PushServerConsumer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultKafkaConsumerImpl.class);
 
     private final AtomicBoolean start = new AtomicBoolean(false);
 
@@ -33,14 +35,18 @@ public class PushServerConsumer<K, V> implements Runnable{
 
     private MessageListenerService messageListenerService;
 
-    public PushServerConsumer(ConsumerConfig configs) {
+    public DefaultKafkaConsumerImpl(ConsumerConfig configs) {
         this.configs = configs;
 
         // KAFKA 0.11 later version.
         if(configs.get("partition.assignment.strategy") == null){
             configs.put("partition.assignment.strategy", "com.tt.kafka.consumer.assignor.CheckTopicStickyAssignor");
         }
-        configs.put("bootstrap.servers", configs.getBootstrapServers());
+        String bootstrapServers = configs.getKafkaServers();
+        if(StringUtils.isBlank(bootstrapServers)){
+            bootstrapServers = KafkaZookeeperConfig.getBrokerIds(configs.getZookeeperServers(), configs.getZookeeperNamespace());
+        }
+        configs.put("bootstrap.servers", bootstrapServers);
         configs.put("group.id", configs.getGroupId());
 
         this.consumer = new KafkaConsumer(configs, new ByteArrayDeserializer(), new ByteArrayDeserializer());
@@ -162,7 +168,7 @@ public class PushServerConsumer<K, V> implements Runnable{
     private String startupInfo(){
         boolean isAssignTopicPartition = !CollectionUtils.isEmpty(configs.getTopicPartitions());
         StringBuilder builder = new StringBuilder(200);
-        builder.append("bootstrap.servers : ").append(configs.getBootstrapServers()).append(" , ");
+        builder.append("bootstrap.servers : ").append(StringUtils.isBlank(configs.getKafkaServers()) ? configs.getZookeeperServers() : configs.getKafkaServers()).append(" , ");
         builder.append("group.id : ").append(configs.getGroupId()).append(" , ");
         builder.append("in ").append(isAssignTopicPartition ? "[assign] : " + configs.getTopicPartitions(): "[subscribe] : " + configs.getTopic()).append(" , ");
         builder.append("with listener service : " + messageListenerService.getClass().getSimpleName()).append(" ");

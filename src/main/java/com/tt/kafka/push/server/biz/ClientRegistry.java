@@ -1,9 +1,8 @@
-package com.tt.kafka.push.server.transport;
+package com.tt.kafka.push.server.biz;
 
 import com.tt.kafka.client.transport.Connection;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 

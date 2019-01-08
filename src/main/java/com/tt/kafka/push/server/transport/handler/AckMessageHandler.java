@@ -1,11 +1,11 @@
 package com.tt.kafka.push.server.transport.handler;
 
+import com.tt.kafka.client.transport.Connection;
 import com.tt.kafka.client.transport.handler.CommonMessageHandler;
 import com.tt.kafka.client.transport.protocol.Header;
 import com.tt.kafka.client.transport.protocol.Packet;
-import com.tt.kafka.client.transport.Connection;
 import com.tt.kafka.metric.MonitorImpl;
-import com.tt.kafka.push.server.consumer.PushServerConsumer;
+import com.tt.kafka.push.server.consumer.DefaultKafkaConsumerImpl;
 import com.tt.kafka.push.server.transport.MemoryQueue;
 import com.tt.kafka.serializer.SerializerImpl;
 import com.tt.kafka.util.NamedThreadFactory;
@@ -15,10 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -28,29 +25,25 @@ public class AckMessageHandler extends CommonMessageHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AckMessageHandler.class);
 
-    private final boolean isAcknowledge;
+    private volatile ConcurrentMap<TopicPartition, OffsetAndMetadata> latestOffsetMap = new ConcurrentHashMap<>();
 
-    protected ScheduledExecutorService commitScheduler;
+    private final AtomicLong messageCount = new AtomicLong(1);
 
-    protected volatile ConcurrentMap<TopicPartition, OffsetAndMetadata> latestOffsetMap = new ConcurrentHashMap<>();
+    private final DefaultKafkaConsumerImpl consumer;
 
-    protected final AtomicLong messageCount = new AtomicLong();
+    private final ScheduledExecutorService commitScheduler;
 
-    private final PushServerConsumer consumer;
-
-    public AckMessageHandler(PushServerConsumer consumer, boolean isAcknowledge){
+    public AckMessageHandler(DefaultKafkaConsumerImpl consumer){
         this.consumer = consumer;
-        this.isAcknowledge = isAcknowledge;
-        if(isAcknowledge){
-            commitScheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("commit-scheduler"));
-        }
+        this.commitScheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("commit-scheduler"));
+        this.commitScheduler.scheduleAtFixedRate(new CommitOffsetTask(), 30, 30, TimeUnit.SECONDS);
     }
 
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
         LOGGER.debug("received ack msgId : {}", packet.getMsgId());
         Packet remove = MemoryQueue.ackMap.remove(packet.getMsgId());
-        if(remove != null && isAcknowledge){
+        if(remove != null){
             Header header = (Header) SerializerImpl.getFastJsonSerializer().deserialize(remove.getHeader(), Header.class);
             acknowledge(header);
         }
