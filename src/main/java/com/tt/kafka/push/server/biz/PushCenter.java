@@ -6,6 +6,7 @@ import com.tt.kafka.client.service.IdService;
 import com.tt.kafka.client.service.LoadBalance;
 import com.tt.kafka.client.service.RetryPolicy;
 import com.tt.kafka.client.transport.Connection;
+import com.tt.kafka.client.transport.exceptions.ChannelInactiveException;
 import com.tt.kafka.client.transport.protocol.Command;
 import com.tt.kafka.client.transport.protocol.Header;
 import com.tt.kafka.client.transport.protocol.Packet;
@@ -60,7 +61,7 @@ public class PushCenter implements Runnable{
         ((DefaultFixedTimeRepushPolicy) this.repushPolicy).start();
     }
 
-    public void push(Packet packet) throws InterruptedException{
+    public void push(Packet packet) throws InterruptedException, ChannelInactiveException{
         checkState();
         this.push(packet, new ChannelFutureListener() {
             @Override
@@ -74,16 +75,17 @@ public class PushCenter implements Runnable{
         });
     }
 
-    private void push(Packet packet, final ChannelFutureListener listener) throws InterruptedException{
-        retryPolicy.reset();
-        Connection connection = loadBalance.select(ClientRegistry.I.getCopyClients());
-        while((connection == null && retryPolicy.allowRetry()) || (!connection.isWritable())){
-            connection = loadBalance.select(ClientRegistry.I.getCopyClients());
-        }
+    private void push(Packet packet, final ChannelFutureListener listener) throws InterruptedException, ChannelInactiveException {
         ControlResult controlResult = flowController.flowControl(packet);
         while(!controlResult.isAllowed()){
             controlResult = flowController.flowControl(packet);
         }
+        retryPolicy.reset();
+        Connection connection = loadBalance.select(ClientRegistry.I.getCopyClients());
+        while((connection == null && retryPolicy.allowRetry()) || (!connection.isWritable() && connection.isActive())){
+            connection = loadBalance.select(ClientRegistry.I.getCopyClients());
+        }
+
         //
         connection.send(packet, listener);
     }
@@ -98,9 +100,8 @@ public class PushCenter implements Runnable{
                 push(packet);
             } catch (InterruptedException ex) {
                 LOGGER.error("InterruptedException", ex);
-            } catch (Exception ex){
-                LOGGER.error("Exception", ex);
-                //in case of NettyConnection throw RuntimeException to miss packet
+            } catch (ChannelInactiveException ex){
+                LOGGER.error("ChannelInactiveException", ex);
                 if(ref != null){
                     try {
                         retryQueue.put(ref);

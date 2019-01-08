@@ -1,5 +1,6 @@
 package com.tt.kafka.push.server.biz.service;
 
+import com.tt.kafka.client.transport.exceptions.ChannelInactiveException;
 import com.tt.kafka.client.transport.protocol.Packet;
 import com.tt.kafka.push.server.biz.PushCenter;
 import com.tt.kafka.push.server.biz.bo.ResendPacket;
@@ -59,12 +60,14 @@ public class DefaultFixedTimeRepushPolicy implements RepushPolicy<Packet>, Runna
                 TimeUnit.MILLISECONDS.sleep(50);
             } catch (InterruptedException ex) {
                 LOGGER.error("InterruptedException", ex);
+            } catch (ChannelInactiveException ex){
+                LOGGER.warn("ChannelInactiveException, here can ignore", ex);
             }
         }
     }
 
     @Override
-    public void repush(Packet msg) throws InterruptedException{
+    public void repush(Packet msg) throws InterruptedException, ChannelInactiveException {
         this.pushCenter.push(msg);
     }
 }
