@@ -19,6 +19,11 @@ public class RoundRobinLoadBalance implements LoadBalance<Connection> {
         if(invokers.size() <= 0){
             return null;
         }
-        return invokers.get(index.incrementAndGet() % invokers.size());
+        if(index.get() >= invokers.size()){
+            index.set(0);
+        }
+        Connection connection = invokers.get(index.get());
+        index.incrementAndGet();
+        return connection;
     }
 }
