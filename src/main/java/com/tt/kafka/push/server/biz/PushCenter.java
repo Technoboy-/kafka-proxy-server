@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -51,7 +52,7 @@ public class PushCenter implements Runnable{
         this.flowController = new DefaultFlowController();
         this.repushPolicy = new DefaultFixedTimeRepushPolicy(this);
         this.retryQueue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
-        this.pushQueue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
+        this.pushQueue = new LinkedBlockingQueue<>(10000);
         this.worker = new Thread(this,"push-worker");
         this.worker.setDaemon(true);
 
@@ -82,7 +83,7 @@ public class PushCenter implements Runnable{
         }
         retryPolicy.reset();
         Connection connection = loadBalance.select(ClientRegistry.I.getCopyClients());
-        while((connection == null && retryPolicy.allowRetry()) || (!connection.isWritable() && connection.isActive())){
+        while((connection == null && retryPolicy.allowRetry()) || (!connection.isWritable() && !connection.isActive())){
             connection = loadBalance.select(ClientRegistry.I.getCopyClients());
         }
 
@@ -103,13 +104,28 @@ public class PushCenter implements Runnable{
             } catch (ChannelInactiveException ex){
                 LOGGER.error("ChannelInactiveException", ex);
                 if(ref != null){
-                    try {
-                        retryQueue.put(ref);
-                    } catch (InterruptedException e) {
-                        LOGGER.error("inner InterruptedException", ex);
-                    }
+                    putOrPush(ref);
                 }
             }
+        }
+    }
+
+    private void putOrPush(Packet ref){
+        if(Thread.currentThread().getName().startsWith("push-worker")){
+            try {
+                boolean offer = retryQueue.offer(ref, 50, TimeUnit.MILLISECONDS);
+                if(!offer){
+                    push(ref);
+                }
+            } catch (InterruptedException e) {
+
+            } catch (ChannelInactiveException e) {
+                putOrPush(ref);
+            }
+        } else{
+            try {
+                retryQueue.put(ref);
+            } catch (InterruptedException e) {}
         }
     }
 
