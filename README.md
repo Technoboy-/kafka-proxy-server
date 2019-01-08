@@ -7,4 +7,8 @@ Kafka的consumer数大于partition数时，多出的consumer将无法消费到�
 
 <img src="docs/static_files/push-server.png"/>
 
+- Push Server： 负责某些consumerGroup的消息拉取，分发。实现了consumer和partition的解耦。
+- 消费者： 根据配置的topic，group，namespace通过zookeeper，获取对应的Push Server节点。
+
+#### 三. 快速使用
 
