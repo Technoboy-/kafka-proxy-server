@@ -9,7 +9,8 @@ import com.tt.kafka.client.transport.Connection;
 import com.tt.kafka.client.transport.protocol.Command;
 import com.tt.kafka.client.transport.protocol.Header;
 import com.tt.kafka.client.transport.protocol.Packet;
-import com.tt.kafka.push.server.transport.MemoryQueue;
+import com.tt.kafka.push.server.biz.bo.ControlResult;
+import com.tt.kafka.push.server.biz.service.*;
 import com.tt.kafka.serializer.SerializerImpl;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -37,24 +38,51 @@ public class PushCenter implements Runnable{
 
     private final LinkedBlockingQueue<ConsumerRecord<byte[], byte[]>> pushQueue;
 
+    private final RepushPolicy repushPolicy;
+
+    private final FlowController flowController;
+
     private final AtomicBoolean start = new AtomicBoolean(false);
 
     public PushCenter(PushConfigs serverConfigs){
         this.loadBalance = new RoundRobinLoadBalance();
         this.retryPolicy = new DefaultRetryPolicy();
+        this.flowController = new DefaultFlowController();
+        this.repushPolicy = new DefaultFixedTimeRepushPolicy(this);
         this.retryQueue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
         this.pushQueue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
-        this.start.compareAndSet(false, true);
         this.worker = new Thread(this,"push-worker");
         this.worker.setDaemon(true);
+
+        //
+        this.start.compareAndSet(false, true);
         this.worker.start();
+        ((DefaultFixedTimeRepushPolicy) this.repushPolicy).start();
     }
 
-    public void push(Packet packet, final ChannelFutureListener listener) throws InterruptedException{
+    public void push(Packet packet) throws InterruptedException{
+        checkState();
+        this.push(packet, new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if(future.isSuccess()){
+                    MessageHolder.fastPut(packet);
+                } else {
+                    retryQueue.put(packet);
+                }
+            }
+        });
+    }
+
+    private void push(Packet packet, final ChannelFutureListener listener) throws InterruptedException{
         retryPolicy.reset();
         Connection connection = loadBalance.select(ClientRegistry.I.getCopyClients());
         while((connection == null && retryPolicy.allowRetry()) || (!connection.isWritable())){
             connection = loadBalance.select(ClientRegistry.I.getCopyClients());
+        }
+        ControlResult controlResult = flowController.flowControl(packet);
+        while(!controlResult.isAllowed()){
+            controlResult = flowController.flowControl(packet);
         }
         //
         connection.send(packet, listener);
@@ -67,16 +95,7 @@ public class PushCenter implements Runnable{
             try {
                 final Packet packet = take();
                 ref = packet;
-                this.push(packet, new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(ChannelFuture future) throws Exception {
-                        if(future.isSuccess()){
-                            MemoryQueue.ackMap.put(packet.getMsgId(), packet);
-                        } else {
-                            retryQueue.put(packet);
-                        }
-                    }
-                });
+                push(packet);
             } catch (InterruptedException ex) {
                 LOGGER.error("InterruptedException", ex);
             } catch (Exception ex){
@@ -116,8 +135,16 @@ public class PushCenter implements Runnable{
         return pushQueue;
     }
 
+    private void checkState(){
+        if(!start.get()){
+            throw new IllegalStateException("push center not start");
+        }
+    }
+
     public void close() {
+        ((DefaultFixedTimeRepushPolicy) this.repushPolicy).close();
         this.start.compareAndSet(true, false);
         this.worker.interrupt();
+
     }
 }

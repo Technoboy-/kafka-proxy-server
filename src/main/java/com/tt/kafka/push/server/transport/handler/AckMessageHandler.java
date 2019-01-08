@@ -6,7 +6,7 @@ import com.tt.kafka.client.transport.protocol.Header;
 import com.tt.kafka.client.transport.protocol.Packet;
 import com.tt.kafka.metric.MonitorImpl;
 import com.tt.kafka.push.server.consumer.DefaultKafkaConsumerImpl;
-import com.tt.kafka.push.server.transport.MemoryQueue;
+import com.tt.kafka.push.server.biz.service.MessageHolder;
 import com.tt.kafka.serializer.SerializerImpl;
 import com.tt.kafka.util.NamedThreadFactory;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -42,10 +42,12 @@ public class AckMessageHandler extends CommonMessageHandler {
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
         LOGGER.debug("received ack msgId : {}", packet.getMsgId());
-        Packet remove = MemoryQueue.ackMap.remove(packet.getMsgId());
-        if(remove != null){
+        Packet remove = MessageHolder.fastRemove(packet);
+        if(remove.getHeader() != null && remove.getHeader().length > 0){
             Header header = (Header) SerializerImpl.getFastJsonSerializer().deserialize(remove.getHeader(), Header.class);
             acknowledge(header);
+        } else{
+            LOGGER.warn("MessageHolder not found ack msgId : {}, just ignore", packet.getMsgId());
         }
     }
 

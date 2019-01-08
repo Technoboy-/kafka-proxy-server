@@ -5,7 +5,6 @@ import com.tt.kafka.client.transport.codec.PacketDecoder;
 import com.tt.kafka.client.transport.codec.PacketEncoder;
 import com.tt.kafka.client.transport.handler.MessageDispatcher;
 import com.tt.kafka.client.transport.protocol.Command;
-import com.tt.kafka.push.server.biz.ServerRegistry;
 import com.tt.kafka.push.server.consumer.DefaultKafkaConsumerImpl;
 import com.tt.kafka.push.server.transport.NettyTcpServer;
 import com.tt.kafka.push.server.transport.handler.AckMessageHandler;
