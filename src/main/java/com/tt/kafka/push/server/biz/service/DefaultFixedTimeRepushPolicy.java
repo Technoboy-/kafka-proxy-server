@@ -4,6 +4,7 @@ import com.tt.kafka.client.transport.exceptions.ChannelInactiveException;
 import com.tt.kafka.client.transport.protocol.Packet;
 import com.tt.kafka.push.server.biz.PushCenter;
 import com.tt.kafka.push.server.biz.bo.ResendPacket;
+import org.apache.zookeeper.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +48,15 @@ public class DefaultFixedTimeRepushPolicy implements RepushPolicy<Packet>, Runna
                 if(first == null){
                     return;
                 }
-                long now = System.currentTimeMillis();
+                long now = SystemClock.millisClock().now();
+                if(first.getRepost() >= 10){
+                    MessageHolder.fastRemove(new Packet(first.getMsgId()));
+                    LOGGER.warn("packet repost fail ", first);
+                    continue;
+                }
                 if(now - first.getTimestamp() >= 3 * 1000){
                     MessageHolder.MSG_QUEUE.poll();
+                    first.setRepost(first.getRepost() + 1);
                     first.setTimestamp(now);
                     try {
                         repush(first.getPacket());

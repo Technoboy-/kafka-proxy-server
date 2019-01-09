@@ -1,6 +1,7 @@
 package com.tt.kafka.push.server.biz.bo;
 
 import com.tt.kafka.client.transport.protocol.Packet;
+import com.tt.kafka.push.server.biz.service.SystemClock;
 
 import java.util.Objects;
 
@@ -10,6 +11,8 @@ import java.util.Objects;
 public class ResendPacket implements Comparable<ResendPacket> {
 
     private long msgId;
+
+    private int repost;
 
     private long timestamp;
 
@@ -21,8 +24,17 @@ public class ResendPacket implements Comparable<ResendPacket> {
 
     public ResendPacket(Packet packet){
         this.msgId = packet.getMsgId();
-        this.timestamp = System.currentTimeMillis();
+        this.repost = 1;
+        this.timestamp = SystemClock.millisClock().now();
         this.packet = packet;
+    }
+
+    public int getRepost() {
+        return repost;
+    }
+
+    public void setRepost(int repost) {
+        this.repost = repost;
     }
 
     public long getMsgId() {
@@ -47,6 +59,16 @@ public class ResendPacket implements Comparable<ResendPacket> {
         if (o == null || getClass() != o.getClass()) return false;
         ResendPacket that = (ResendPacket) o;
         return getMsgId() == that.getMsgId();
+    }
+
+    @Override
+    public String toString() {
+        return "ResendPacket{" +
+                "msgId=" + msgId +
+                ", repost=" + repost +
+                ", timestamp=" + timestamp +
+                ", packet=" + packet +
+                '}';
     }
 
     @Override
