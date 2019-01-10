@@ -35,10 +35,13 @@ public class MappedFile {
 
     private final AtomicLong writePosition = new AtomicLong(0);
 
+    private final long fileFromOffset;
+
     public MappedFile(final String fileName, final long fileSize) throws IOException {
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.file = new File(fileName);
+        this.fileFromOffset = Long.parseLong(fileName);
         init();
     }
 
