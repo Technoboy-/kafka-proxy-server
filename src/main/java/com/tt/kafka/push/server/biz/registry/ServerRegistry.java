@@ -1,6 +1,6 @@
-package com.tt.kafka.push.server.biz;
+package com.tt.kafka.push.server.biz.registry;
 
-import com.tt.kafka.client.PushConfigs;
+import com.tt.kafka.client.SystemPropertiesUtils;
 import com.tt.kafka.client.service.RegisterMetadata;
 import com.tt.kafka.client.service.RegistryService;
 import com.tt.kafka.client.transport.Address;
@@ -23,27 +23,24 @@ public class ServerRegistry {
 
     private ScheduledFuture<?> registerScheduledFuture;
 
-    private final PushConfigs serverConfigs;
-
-    public ServerRegistry(PushConfigs configs){
-        this.serverConfigs = configs;
-        this.registryService = new RegistryService(configs);
+    public ServerRegistry(RegistryService registryService){
+        this.registryService = registryService;
         this.executorService = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("register-zk-thread"));
     }
 
     public void register(){
-        Address address = new Address(NetUtils.getLocalIp(), serverConfigs.getServerPort());
+        Address address = new Address(NetUtils.getLocalIp(), SystemPropertiesUtils.getInt(Constants.PUSH_SERVER_PORT, 10666));
         RegisterMetadata registerMetadata = new RegisterMetadata();
-        registerMetadata.setPath(String.format(Constants.ZOOKEEPER_PROVIDERS, serverConfigs.getServerTopic()));
+        registerMetadata.setPath(String.format(Constants.ZOOKEEPER_PROVIDERS, SystemPropertiesUtils.get(Constants.PUSH_SERVER_TOPIC)));
         registerMetadata.setAddress(address);
         this.registryService.register(registerMetadata);
         startSchedulerTask();
     }
 
     public void unregister(){
-        Address address = new Address(NetUtils.getLocalIp(), serverConfigs.getServerPort());
+        Address address = new Address(NetUtils.getLocalIp(), SystemPropertiesUtils.getInt(Constants.PUSH_SERVER_PORT, 10666));
         RegisterMetadata registerMetadata = new RegisterMetadata();
-        registerMetadata.setPath(String.format(Constants.ZOOKEEPER_PROVIDERS, serverConfigs.getServerTopic()));
+        registerMetadata.setPath(String.format(Constants.ZOOKEEPER_PROVIDERS, SystemPropertiesUtils.get(Constants.PUSH_SERVER_TOPIC)));
         registerMetadata.setAddress(address);
         this.registryService.unregister(registerMetadata);
     }

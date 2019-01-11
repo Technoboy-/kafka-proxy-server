@@ -7,5 +7,7 @@ import com.tt.kafka.client.transport.exceptions.ChannelInactiveException;
  */
 public interface RepushPolicy<T> {
 
+    void start();
+
     void repush(T msg) throws InterruptedException, ChannelInactiveException;
 }

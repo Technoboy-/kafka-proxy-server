@@ -1,8 +1,8 @@
 package com.tt.kafka.push.server.consumer;
 
-import com.tt.kafka.client.PushConfigs;
 import com.tt.kafka.consumer.service.RebalanceMessageListenerService;
 import com.tt.kafka.push.server.biz.PushCenter;
+import com.tt.kafka.push.server.biz.registry.RegistryCenter;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 /**
@@ -12,8 +12,8 @@ public class AcknowledgeMessageListenerService<K, V> extends RebalanceMessageLis
 
     private final PushCenter pushCenter;
 
-    public AcknowledgeMessageListenerService(PushConfigs serverConfigs){
-        this.pushCenter = new PushCenter(serverConfigs);
+    public AcknowledgeMessageListenerService(){
+        this.pushCenter = new PushCenter();
     }
 
     @Override

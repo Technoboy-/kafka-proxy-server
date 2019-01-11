@@ -3,7 +3,6 @@ import com.tt.kafka.client.transport.handler.MessageDispatcher;
 import com.tt.kafka.client.transport.protocol.Packet;
 import com.tt.kafka.client.transport.Connection;
 import com.tt.kafka.client.transport.NettyConnection;
-import com.tt.kafka.push.server.biz.ClientRegistry;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -30,7 +29,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Connection connnection = NettyConnection.attachChannel(ctx.channel());
-        ClientRegistry.I.unregister(connnection);
+        //TODO
+//        ClientRegistry.I.unregister(connnection);
         connnection.close();
     }
 

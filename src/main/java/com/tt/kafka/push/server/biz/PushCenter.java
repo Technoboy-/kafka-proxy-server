@@ -1,6 +1,6 @@
 package com.tt.kafka.push.server.biz;
 
-import com.tt.kafka.client.PushConfigs;
+import com.tt.kafka.client.SystemPropertiesUtils;
 import com.tt.kafka.client.service.DefaultRetryPolicy;
 import com.tt.kafka.client.service.IdService;
 import com.tt.kafka.client.service.LoadBalance;
@@ -11,8 +11,10 @@ import com.tt.kafka.client.transport.protocol.Command;
 import com.tt.kafka.client.transport.protocol.Header;
 import com.tt.kafka.client.transport.protocol.Packet;
 import com.tt.kafka.push.server.biz.bo.ControlResult;
+import com.tt.kafka.push.server.biz.registry.RegistryCenter;
 import com.tt.kafka.push.server.biz.service.*;
 import com.tt.kafka.serializer.SerializerImpl;
+import com.tt.kafka.util.Constants;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -30,36 +32,32 @@ public class PushCenter implements Runnable{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PushCenter.class);
 
-    private final LoadBalance<Connection> loadBalance;
+    private final int queueSize = SystemPropertiesUtils.getInt(Constants.PUSH_SERVER_QUEUE_SIZE, 100);
 
-    private final RetryPolicy retryPolicy;
+    private final LoadBalance<Connection> loadBalance = new RoundRobinLoadBalance();
 
-    private final Thread worker;
+    private final RetryPolicy retryPolicy = new DefaultRetryPolicy();
 
-    private final LinkedBlockingQueue<Packet> retryQueue;
+    private final LinkedBlockingQueue<Packet> retryQueue = new LinkedBlockingQueue<>(queueSize);
 
-    private final LinkedBlockingQueue<ConsumerRecord<byte[], byte[]>> pushQueue;
+    private final LinkedBlockingQueue<ConsumerRecord<byte[], byte[]>> pushQueue = new LinkedBlockingQueue<>(queueSize);
 
-    private final RepushPolicy repushPolicy;
+    private final RepushPolicy repushPolicy = new DefaultFixedTimeRepushPolicy(this);
 
-    private final FlowController flowController;
+    private final FlowController flowController = new DefaultFlowController();
 
     private final AtomicBoolean start = new AtomicBoolean(false);
 
-    public PushCenter(PushConfigs serverConfigs){
-        this.loadBalance = new RoundRobinLoadBalance();
-        this.retryPolicy = new DefaultRetryPolicy();
-        this.flowController = new DefaultFlowController();
-        this.repushPolicy = new DefaultFixedTimeRepushPolicy(this);
-        this.retryQueue = new LinkedBlockingQueue<>(serverConfigs.getServerQueueSize());
-        this.pushQueue = new LinkedBlockingQueue<>(10000);
+    private final Thread worker;
+
+    public PushCenter(){
         this.worker = new Thread(this,"push-worker");
         this.worker.setDaemon(true);
 
         //
         this.start.compareAndSet(false, true);
         this.worker.start();
-        ((DefaultFixedTimeRepushPolicy) this.repushPolicy).start();
+        this.repushPolicy.start();
     }
 
     public void push(Packet packet) throws InterruptedException, ChannelInactiveException{
@@ -82,9 +80,9 @@ public class PushCenter implements Runnable{
             controlResult = flowController.flowControl(packet);
         }
         retryPolicy.reset();
-        Connection connection = loadBalance.select(ClientRegistry.I.getCopyClients());
+        Connection connection = loadBalance.select(RegistryCenter.I.getClientRegistry().getClients());
         while((connection == null && retryPolicy.allowRetry()) || (!connection.isWritable() && !connection.isActive())){
-            connection = loadBalance.select(ClientRegistry.I.getCopyClients());
+            connection = loadBalance.select(RegistryCenter.I.getClientRegistry().getClients());
         }
 
         //

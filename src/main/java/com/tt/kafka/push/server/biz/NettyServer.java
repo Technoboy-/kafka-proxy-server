@@ -1,16 +1,18 @@
 package com.tt.kafka.push.server.biz;
 
-import com.tt.kafka.client.PushConfigs;
+import com.tt.kafka.client.SystemPropertiesUtils;
 import com.tt.kafka.client.transport.codec.PacketDecoder;
 import com.tt.kafka.client.transport.codec.PacketEncoder;
 import com.tt.kafka.client.transport.handler.MessageDispatcher;
 import com.tt.kafka.client.transport.protocol.Command;
+import com.tt.kafka.push.server.biz.registry.RegistryCenter;
 import com.tt.kafka.push.server.consumer.DefaultKafkaConsumerImpl;
 import com.tt.kafka.push.server.transport.NettyTcpServer;
 import com.tt.kafka.push.server.transport.handler.AckMessageHandler;
 import com.tt.kafka.push.server.transport.handler.HeartbeatMessageHandler;
 import com.tt.kafka.push.server.transport.handler.ServerHandler;
 import com.tt.kafka.push.server.transport.handler.UnregisterMessageHandler;
+import com.tt.kafka.util.Constants;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
@@ -24,16 +26,17 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
  */
 public class NettyServer extends NettyTcpServer {
 
+
+    private static final int port = SystemPropertiesUtils.getInt(Constants.PUSH_SERVER_PORT, 10666);
+
+    private static final int bossNum = SystemPropertiesUtils.getInt(Constants.PUSH_SERVER_BOSS_NUM, 1);
+
+    private static final int workerNum = SystemPropertiesUtils.getInt(Constants.PUSH_SERVER_WORKER_NUM, Constants.CPU_SIZE);
+
     private final ChannelHandler handler;
 
-    private final PushConfigs serverConfigs;
-
-    private final ServerRegistry serverRegistry;
-
-    public NettyServer(PushConfigs configs, DefaultKafkaConsumerImpl consumer) {
-        super(configs.getServerPort(), configs.getServerBossNum(), configs.getServerWorkerNum());
-        this.serverConfigs = configs;
-        this.serverRegistry = new ServerRegistry(configs);
+    public NettyServer(DefaultKafkaConsumerImpl consumer) {
+        super(port, bossNum, workerNum);
         this.handler = new ServerHandler(newDispatcher(consumer));
     }
 
@@ -54,7 +57,7 @@ public class NettyServer extends NettyTcpServer {
 
     @Override
     protected void afterStart() {
-        this.serverRegistry.register();
+        RegistryCenter.I.getServerRegistry().register();
     }
 
     protected void initNettyChannel(NioSocketChannel ch) throws Exception{
@@ -85,7 +88,6 @@ public class NettyServer extends NettyTcpServer {
 
     public void close(){
         super.close();
-        this.serverRegistry.destroy();
     }
 
 }
