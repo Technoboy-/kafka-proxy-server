@@ -1,6 +1,6 @@
 package com.tt.kafka.push.server.biz;
 
-import com.tt.kafka.client.SystemPropertiesUtils;
+import com.tt.kafka.client.util.SystemPropertiesUtils;
 import com.tt.kafka.client.service.DefaultRetryPolicy;
 import com.tt.kafka.client.service.IdService;
 import com.tt.kafka.client.service.LoadBalance;

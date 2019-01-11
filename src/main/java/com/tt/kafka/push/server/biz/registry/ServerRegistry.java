@@ -1,6 +1,6 @@
 package com.tt.kafka.push.server.biz.registry;
 
-import com.tt.kafka.client.SystemPropertiesUtils;
+import com.tt.kafka.client.util.SystemPropertiesUtils;
 import com.tt.kafka.client.service.RegisterMetadata;
 import com.tt.kafka.client.service.RegistryService;
 import com.tt.kafka.client.transport.Address;

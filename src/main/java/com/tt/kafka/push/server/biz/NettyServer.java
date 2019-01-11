@@ -1,6 +1,6 @@
 package com.tt.kafka.push.server.biz;
 
-import com.tt.kafka.client.SystemPropertiesUtils;
+import com.tt.kafka.client.util.SystemPropertiesUtils;
 import com.tt.kafka.client.transport.codec.PacketDecoder;
 import com.tt.kafka.client.transport.codec.PacketEncoder;
 import com.tt.kafka.client.transport.handler.MessageDispatcher;

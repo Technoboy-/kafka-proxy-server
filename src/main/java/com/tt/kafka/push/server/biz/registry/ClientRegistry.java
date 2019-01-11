@@ -1,17 +1,15 @@
 package com.tt.kafka.push.server.biz.registry;
 
-import com.tt.kafka.client.SystemPropertiesUtils;
+import com.tt.kafka.client.util.SystemPropertiesUtils;
 import com.tt.kafka.client.service.RegisterMetadata;
 import com.tt.kafka.client.service.RegistryService;
 import com.tt.kafka.client.transport.Address;
 import com.tt.kafka.client.transport.Connection;
 import com.tt.kafka.util.Constants;
-import io.netty.channel.Channel;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
