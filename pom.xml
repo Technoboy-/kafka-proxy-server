@@ -28,7 +28,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.tt.kafka</groupId>
+            <groupId>com.owl.kafka</groupId>
             <artifactId>kafka-client</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
