@@ -41,7 +41,7 @@ public class NettyServer extends NettyTcpServer {
 
     private MessageDispatcher newDispatcher(DefaultKafkaConsumerImpl consumer){
         MessageDispatcher dispatcher = new MessageDispatcher();
-        dispatcher.register(Command.HEARTBEAT, new HeartbeatMessageHandler());
+        dispatcher.register(Command.PING, new HeartbeatMessageHandler());
         dispatcher.register(Command.UNREGISTER, new UnregisterMessageHandler());
         dispatcher.register(Command.ACK, new AckMessageHandler(consumer));
         return dispatcher;
@@ -66,7 +66,7 @@ public class NettyServer extends NettyTcpServer {
         pipeline.addLast("encoder", getEncoder());
         //in
         pipeline.addLast("decoder", getDecoder());
-        pipeline.addLast("timeOutHandler", new ReadTimeoutHandler(120));
+        pipeline.addLast("timeOutHandler", new ReadTimeoutHandler(90));
         pipeline.addLast("handler", getChannelHandler());
     }
 

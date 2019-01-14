@@ -15,21 +15,21 @@ public class ServerConfigs extends ConfigLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerConfigs.class);
 
     // server configs
-    String SERVER_PORT = "server.port";
+    static final String SERVER_PORT = "server.port";
 
-    String SERVER_BOSS_NUM = "server.boss.num";
+    static final String SERVER_BOSS_NUM = "server.boss.num";
 
-    String SERVER_WORKER_NUM = "server.worker.num";
+    static final String SERVER_WORKER_NUM = "server.worker.num";
 
-    String SERVER_QUEUE_SIZE = "server.queue.size";
+    static final String SERVER_QUEUE_SIZE = "server.queue.size";
 
-    String SERVER_TOPIC = "server.topic";
+    static final String SERVER_TOPIC = "server.topic";
 
-    String SERVER_GROUP_ID = "server.group.id";
+    static final String SERVER_GROUP_ID = "server.group.id";
 
-    String SERVER_KAFKA_SERVER_LIST = "server.kafka.server.list";
+    static final String SERVER_KAFKA_SERVER_LIST = "server.kafka.server.list";
 
-    static String SERVER_CONFIG_FILE = "push_server.properties";
+    static final  String SERVER_CONFIG_FILE = "push_server.properties";
 
     public static ServerConfigs I = new ServerConfigs(SERVER_CONFIG_FILE);
 
