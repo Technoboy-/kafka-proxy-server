@@ -21,7 +21,6 @@ public class HeartbeatMessageHandler extends CommonMessageHandler {
         if(LOGGER.isDebugEnabled()){
             LOGGER.debug("received heartbeat : {}, from : {}", packet, NetUtils.getRemoteAddress(connection.getChannel()));
         }
-        System.out.println("received heartbeat" + packet);
         connection.send(Packets.pong());
         RegistryCenter.I.getClientRegistry().register(connection);
     }
