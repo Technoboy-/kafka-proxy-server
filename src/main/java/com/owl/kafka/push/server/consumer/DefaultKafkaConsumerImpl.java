@@ -27,7 +27,7 @@ public class DefaultKafkaConsumerImpl<K, V> implements Runnable{
 
     private final AtomicBoolean start = new AtomicBoolean(false);
 
-    private Consumer<byte[], byte[]> consumer;
+    private final Consumer<byte[], byte[]> consumer;
 
     private final Thread worker = new Thread(this, "consumer-poll-worker");
 
