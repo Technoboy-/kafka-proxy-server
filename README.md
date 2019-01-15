@@ -22,5 +22,5 @@ JDK1.7或更高版本
 #### 四. 关于DLQ
 <img src="docs/static_files/DLQ.jpg"/>
 
-- 1. push-server下推消息后，如果3s后未收到ack，将重复投递，共投递10次。10次后，将投递失败的消息写入kafka的主题为<topic>-dlq中。
-- 2. 将失败消息的msgId和写入kafka的dlq中的offset的映射关系写入zk，后续可通过msgId查看DLQ消息。
+- push-server下推消息后，如果3s后未收到ack，将重复投递，共投递10次。10次后，将投递失败的消息写入kafka的主题为<topic>-dlq中。
+- 将失败消息的msgId和写入kafka的dlq中的offset的映射关系写入zk，后续可通过msgId查看DLQ消息。
