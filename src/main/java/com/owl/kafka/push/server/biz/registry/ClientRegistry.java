@@ -40,10 +40,10 @@ public class ClientRegistry {
     }
 
     private RegisterMetadata toRegisterMetadata(Connection connection){
-        RegisterMetadata metadata = new RegisterMetadata();
-        metadata.setPath(String.format(ServerConfigs.I.ZOOKEEPER_CONSUMERS, ServerConfigs.I.getServerTopic()));
         InetSocketAddress remoteAddress = ((InetSocketAddress)connection.getRemoteAddress());
         Address address = new Address(remoteAddress.getHostName(), remoteAddress.getPort());
+        RegisterMetadata metadata = new RegisterMetadata();
+        metadata.setPath(String.format(ServerConfigs.I.ZOOKEEPER_CONSUMERS, ServerConfigs.I.getServerTopic()));
         metadata.setAddress(address);
         return metadata;
     }

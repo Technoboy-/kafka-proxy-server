@@ -18,13 +18,8 @@ public class ServerRegistry {
 
     private final RegistryService registryService;
 
-    private final ScheduledThreadPoolExecutor executorService;
-
-    private ScheduledFuture<?> registerScheduledFuture;
-
     public ServerRegistry(RegistryService registryService){
         this.registryService = registryService;
-        this.executorService = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("register-zk-thread"));
     }
 
     public void register(){
@@ -33,7 +28,6 @@ public class ServerRegistry {
         registerMetadata.setPath(String.format(ServerConfigs.I.ZOOKEEPER_PROVIDERS, ServerConfigs.I.getServerTopic()));
         registerMetadata.setAddress(address);
         this.registryService.register(registerMetadata);
-        startSchedulerTask();
     }
 
     public void unregister(){
@@ -44,20 +38,4 @@ public class ServerRegistry {
         this.registryService.unregister(registerMetadata);
     }
 
-    private void startSchedulerTask(){
-        registerScheduledFuture = executorService.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                register();
-            }
-        }, 30, 30, TimeUnit.SECONDS);
-    }
-
-    public void destroy(){
-        if(registerScheduledFuture != null && !registerScheduledFuture.isDone()){
-            registerScheduledFuture.cancel(true);
-        }
-        this.executorService.purge();
-        this.unregister();
-    }
 }

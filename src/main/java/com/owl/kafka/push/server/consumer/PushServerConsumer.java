@@ -21,9 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Author: Tboy
  */
 @SuppressWarnings("all")
-public class DefaultKafkaConsumerImpl<K, V> implements Runnable{
+public class PushServerConsumer<K, V> implements Runnable{
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultKafkaConsumerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PushServerConsumer.class);
 
     private final AtomicBoolean start = new AtomicBoolean(false);
 
@@ -35,7 +35,7 @@ public class DefaultKafkaConsumerImpl<K, V> implements Runnable{
 
     private MessageListenerService messageListenerService;
 
-    public DefaultKafkaConsumerImpl(ConsumerConfig configs) {
+    public PushServerConsumer(ConsumerConfig configs) {
         this.configs = configs;
 
         // KAFKA 0.11 later version.

@@ -8,7 +8,7 @@ import com.owl.kafka.push.server.biz.registry.RegistryCenter;
 import com.owl.kafka.push.server.transport.NettyTcpServer;
 import com.owl.kafka.push.server.transport.handler.*;
 import com.owl.kafka.client.transport.protocol.Command;
-import com.owl.kafka.push.server.consumer.DefaultKafkaConsumerImpl;
+import com.owl.kafka.push.server.consumer.PushServerConsumer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
@@ -30,12 +30,12 @@ public class NettyServer extends NettyTcpServer {
 
     private final ChannelHandler handler;
 
-    public NettyServer(DefaultKafkaConsumerImpl consumer) {
+    public NettyServer(PushServerConsumer consumer) {
         super(port, bossNum, workerNum);
         this.handler = new ServerHandler(newDispatcher(consumer));
     }
 
-    private MessageDispatcher newDispatcher(DefaultKafkaConsumerImpl consumer){
+    private MessageDispatcher newDispatcher(PushServerConsumer consumer){
         MessageDispatcher dispatcher = new MessageDispatcher();
         dispatcher.register(Command.PING, new HeartbeatMessageHandler());
         dispatcher.register(Command.UNREGISTER, new UnregisterMessageHandler());

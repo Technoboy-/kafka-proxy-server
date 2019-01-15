@@ -7,7 +7,7 @@ import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.service.DLQService;
 import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import com.owl.kafka.push.server.consumer.AcknowledgeMessageListenerService;
-import com.owl.kafka.push.server.consumer.DefaultKafkaConsumerImpl;
+import com.owl.kafka.push.server.consumer.PushServerConsumer;
 import com.owl.kafka.util.StringUtils;
 
 /**
@@ -15,7 +15,7 @@ import com.owl.kafka.util.StringUtils;
  */
 public class PushServer {
 
-    private final DefaultKafkaConsumerImpl consumer;
+    private final PushServerConsumer consumer;
 
     private final MessageListenerService messageListenerService;
 
@@ -30,7 +30,7 @@ public class PushServer {
         }
         ConsumerConfig consumerConfigs = new ConsumerConfig(kafkaServerList, ServerConfigs.I.getServerTopic(), ServerConfigs.I.getServerGroupId());
         consumerConfigs.setAutoCommit(false);
-        this.consumer = new DefaultKafkaConsumerImpl(consumerConfigs);
+        this.consumer = new PushServerConsumer(consumerConfigs);
         this.nettyServer = new NettyServer(consumer);
         this.messageListenerService = new AcknowledgeMessageListenerService();
         this.consumer.setMessageListenerService(messageListenerService);

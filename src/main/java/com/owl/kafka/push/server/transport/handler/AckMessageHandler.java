@@ -6,7 +6,7 @@ import com.owl.kafka.client.transport.protocol.Header;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.metric.MonitorImpl;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
-import com.owl.kafka.push.server.consumer.DefaultKafkaConsumerImpl;
+import com.owl.kafka.push.server.consumer.PushServerConsumer;
 import com.owl.kafka.push.server.biz.service.MessageHolder;
 import com.owl.kafka.serializer.SerializerImpl;
 import com.owl.kafka.util.NamedThreadFactory;
@@ -30,7 +30,7 @@ public class AckMessageHandler extends CommonMessageHandler {
 
     private final AtomicLong messageCount = new AtomicLong(1);
 
-    private final DefaultKafkaConsumerImpl consumer;
+    private final PushServerConsumer consumer;
 
     private final ScheduledExecutorService commitScheduler;
 
@@ -38,7 +38,7 @@ public class AckMessageHandler extends CommonMessageHandler {
 
     private final int batchSize = ServerConfigs.I.getServerCommitOffsetBatchSize();
 
-    public AckMessageHandler(DefaultKafkaConsumerImpl consumer){
+    public AckMessageHandler(PushServerConsumer consumer){
         this.consumer = consumer;
         this.commitScheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("commit-scheduler"));
         this.commitScheduler.scheduleAtFixedRate(new CommitOffsetTask(), interval, interval, TimeUnit.SECONDS);
