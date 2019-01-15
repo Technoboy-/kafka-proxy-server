@@ -6,12 +6,9 @@ import com.owl.kafka.client.transport.handler.MessageDispatcher;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.registry.RegistryCenter;
 import com.owl.kafka.push.server.transport.NettyTcpServer;
-import com.owl.kafka.push.server.transport.handler.AckMessageHandler;
-import com.owl.kafka.push.server.transport.handler.HeartbeatMessageHandler;
-import com.owl.kafka.push.server.transport.handler.ServerHandler;
+import com.owl.kafka.push.server.transport.handler.*;
 import com.owl.kafka.client.transport.protocol.Command;
 import com.owl.kafka.push.server.consumer.DefaultKafkaConsumerImpl;
-import com.owl.kafka.push.server.transport.handler.UnregisterMessageHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
@@ -24,7 +21,6 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
  * @Author: Tboy
  */
 public class NettyServer extends NettyTcpServer {
-
 
     private static final int port = ServerConfigs.I.getServerPort();
 
@@ -44,6 +40,7 @@ public class NettyServer extends NettyTcpServer {
         dispatcher.register(Command.PING, new HeartbeatMessageHandler());
         dispatcher.register(Command.UNREGISTER, new UnregisterMessageHandler());
         dispatcher.register(Command.ACK, new AckMessageHandler(consumer));
+        dispatcher.register(Command.VIEW, new ViewMessageHandler());
         return dispatcher;
     }
 

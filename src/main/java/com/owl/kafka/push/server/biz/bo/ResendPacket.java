@@ -1,7 +1,7 @@
 package com.owl.kafka.push.server.biz.bo;
 
-import com.owl.kafka.push.server.biz.service.SystemClock;
 import com.owl.kafka.client.transport.protocol.Packet;
+import com.owl.kafka.push.server.biz.service.SystemClock;
 
 import java.util.Objects;
 

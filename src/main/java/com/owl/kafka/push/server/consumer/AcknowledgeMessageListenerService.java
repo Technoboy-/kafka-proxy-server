@@ -13,6 +13,7 @@ public class AcknowledgeMessageListenerService<K, V> extends RebalanceMessageLis
 
     public AcknowledgeMessageListenerService(){
         this.pushCenter = new PushCenter();
+        this.pushCenter.start();
     }
 
     @Override

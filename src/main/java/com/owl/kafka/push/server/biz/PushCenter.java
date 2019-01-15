@@ -52,8 +52,9 @@ public class PushCenter implements Runnable{
     public PushCenter(){
         this.worker = new Thread(this,"push-worker");
         this.worker.setDaemon(true);
+    }
 
-        //
+    public void start(){
         this.start.compareAndSet(false, true);
         this.worker.start();
         this.repushPolicy.start();
@@ -73,6 +74,7 @@ public class PushCenter implements Runnable{
         });
     }
 
+    //TODO flow control and loadbalance can be optimized by using wait, notify
     private void push(Packet packet, final ChannelFutureListener listener) throws InterruptedException, ChannelInactiveException {
         ControlResult controlResult = flowController.flowControl(packet);
         while(!controlResult.isAllowed()){
@@ -159,6 +161,5 @@ public class PushCenter implements Runnable{
         ((DefaultFixedTimeRepushPolicy) this.repushPolicy).close();
         this.start.compareAndSet(true, false);
         this.worker.interrupt();
-
     }
 }

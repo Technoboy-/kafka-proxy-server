@@ -51,6 +51,7 @@ public class DefaultFixedTimeRepushPolicy implements RepushPolicy<Packet>, Runna
                 if(first.getRepost() >= 10){
                     MessageHolder.fastRemove(new Packet(first.getMsgId()));
                     LOGGER.warn("packet repost fail ", first);
+                    InstanceHolder.I.getDLQService().write(first);
                     continue;
                 }
                 if(now - first.getTimestamp() >= 3 * 1000){

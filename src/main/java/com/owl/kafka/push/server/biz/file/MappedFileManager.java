@@ -111,9 +111,9 @@ public class MappedFileManager {
         return (byte) "0123456789ABCDEF".indexOf(c);
     }
 
-    public void write(long fileFromOffset, ByteBuffer byteBuffer, Packet packet){
+    public void write(long fileFromOffset, ByteBuffer byteBuffer, Packet packet, SocketAddress socketAddress){
         long wroteOffset = fileFromOffset + byteBuffer.position();
-        String messageId = createMessageId(idStore, host(new InetSocketAddress(90)), wroteOffset);
+        String messageId = createMessageId(idStore, host(socketAddress), wroteOffset);
         int length = calculate(packet);
         reset(store, length);
         store.put(packet.getVersion());
