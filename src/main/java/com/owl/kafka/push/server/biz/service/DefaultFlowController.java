@@ -3,6 +3,8 @@ package com.owl.kafka.push.server.biz.service;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.push.server.biz.PushCenter;
 import com.owl.kafka.push.server.biz.bo.ControlResult;
+import com.owl.kafka.push.server.biz.bo.ServerConfigs;
+import com.owl.kafka.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +17,9 @@ public class DefaultFlowController implements FlowController<Packet> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PushCenter.class);
 
-    private static final long ALLOW_MOMERY_SIZE = 64 * 1024 * 1024;
+    private final long ALLOW_MOMERY_SIZE = ServerConfigs.I.getServerFlowControlMessageSize() * Constants.M_BYTES;
 
-    private static final long ALLOW_COUNT = 10000;
+    private final long ALLOW_COUNT = ServerConfigs.I.getServerFlowControlMessageCount();
 
     @Override
     public ControlResult flowControl(Packet packet) {

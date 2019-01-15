@@ -5,6 +5,7 @@ import com.owl.kafka.client.transport.handler.CommonMessageHandler;
 import com.owl.kafka.client.transport.protocol.Header;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.metric.MonitorImpl;
+import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.consumer.DefaultKafkaConsumerImpl;
 import com.owl.kafka.push.server.biz.service.MessageHolder;
 import com.owl.kafka.serializer.SerializerImpl;
@@ -33,10 +34,14 @@ public class AckMessageHandler extends CommonMessageHandler {
 
     private final ScheduledExecutorService commitScheduler;
 
+    private final int interval = ServerConfigs.I.getServerCommitOffsetInterval();
+
+    private final int batchSize = ServerConfigs.I.getServerCommitOffsetBatchSize();
+
     public AckMessageHandler(DefaultKafkaConsumerImpl consumer){
         this.consumer = consumer;
         this.commitScheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("commit-scheduler"));
-        this.commitScheduler.scheduleAtFixedRate(new CommitOffsetTask(), 30, 30, TimeUnit.SECONDS);
+        this.commitScheduler.scheduleAtFixedRate(new CommitOffsetTask(), interval, interval, TimeUnit.SECONDS);
     }
 
     @Override
@@ -52,7 +57,7 @@ public class AckMessageHandler extends CommonMessageHandler {
     }
 
     protected void acknowledge(Header header){
-        if (messageCount.incrementAndGet() % 10000 == 0) {
+        if (messageCount.incrementAndGet() % batchSize == 0) {
             commitScheduler.execute(new CommitOffsetTask());
         }
         toOffsetMap(header);

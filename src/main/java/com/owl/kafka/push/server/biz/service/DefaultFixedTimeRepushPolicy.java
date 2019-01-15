@@ -4,6 +4,7 @@ import com.owl.kafka.push.server.biz.bo.ResendPacket;
 import com.owl.kafka.client.transport.exceptions.ChannelInactiveException;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.push.server.biz.PushCenter;
+import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,10 @@ public class DefaultFixedTimeRepushPolicy implements RepushPolicy<Packet>, Runna
     private final AtomicBoolean start = new AtomicBoolean(false);
 
     private final PushCenter pushCenter;
+
+    private final int reposts = ServerConfigs.I.getServerMessageRepostTimes();
+
+    private final long interval = TimeUnit.SECONDS.toMillis(ServerConfigs.I.getServerMessageRepostInterval());
 
     public DefaultFixedTimeRepushPolicy(PushCenter pushCenter){
         this.pushCenter = pushCenter;
@@ -48,13 +53,13 @@ public class DefaultFixedTimeRepushPolicy implements RepushPolicy<Packet>, Runna
                     return;
                 }
                 long now = SystemClock.millisClock().now();
-                if(first.getRepost() >= 10){
+                if(first.getRepost() >= reposts){
                     MessageHolder.fastRemove(new Packet(first.getMsgId()));
                     LOGGER.warn("packet repost fail ", first);
                     InstanceHolder.I.getDLQService().write(first);
                     continue;
                 }
-                if(now - first.getTimestamp() >= 3 * 1000){
+                if(now - first.getTimestamp() >= interval){
                     MessageHolder.MSG_QUEUE.poll();
                     first.setRepost(first.getRepost() + 1);
                     first.setTimestamp(now);
@@ -64,7 +69,7 @@ public class DefaultFixedTimeRepushPolicy implements RepushPolicy<Packet>, Runna
                         MessageHolder.MSG_QUEUE.offer(first);
                     }
                 }
-                TimeUnit.MILLISECONDS.sleep(50);
+                TimeUnit.MILLISECONDS.sleep(30);
             } catch (InterruptedException ex) {
                 LOGGER.error("InterruptedException", ex);
             } catch (ChannelInactiveException ex){
@@ -77,4 +82,5 @@ public class DefaultFixedTimeRepushPolicy implements RepushPolicy<Packet>, Runna
     public void repush(Packet msg) throws InterruptedException, ChannelInactiveException {
         this.pushCenter.push(msg);
     }
+
 }

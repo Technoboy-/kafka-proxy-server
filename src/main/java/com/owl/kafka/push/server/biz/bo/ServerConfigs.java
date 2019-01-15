@@ -29,6 +29,18 @@ public class ServerConfigs extends ConfigLoader {
 
     static final String SERVER_KAFKA_SERVER_LIST = "server.kafka.server.list";
 
+    static final String SERVER_COMMIT_OFFSET_INTERVAL = "server.commit.offset.interval";
+
+    static final String SERVER_COMMIT_OFFSET_BATCH_SIZE = "server.commit.offset.batch.size";
+
+    static final String SERVER_MESSAGE_REPOST_TIMES = "server.message.repost.times";
+
+    static final String SERVER_MESSAGE_REPOST_INTERVAL = "server.message.repost.interval";
+
+    static final String SERVER_FLOW_CONTROL_MESSAGE_COUNT = "server.flow.control.message.count";
+
+    static final String SERVER_FLOW_CONTROL_MESSAGE_SIZE = "server.flow.control.message.size";
+
     static final  String SERVER_CONFIG_FILE = "push_server.properties";
 
     public static ServerConfigs I = new ServerConfigs(SERVER_CONFIG_FILE);
@@ -71,4 +83,27 @@ public class ServerConfigs extends ConfigLoader {
         return get(SERVER_KAFKA_SERVER_LIST);
     }
 
+    public int getServerCommitOffsetInterval() {
+        return getInt(SERVER_COMMIT_OFFSET_INTERVAL, 30);
+    }
+
+    public int getServerCommitOffsetBatchSize() {
+        return getInt(SERVER_COMMIT_OFFSET_BATCH_SIZE, 10000);
+    }
+
+    public int getServerMessageRepostTimes() {
+        return getInt(SERVER_MESSAGE_REPOST_TIMES, 10);
+    }
+
+    public int getServerMessageRepostInterval() {
+        return getInt(SERVER_MESSAGE_REPOST_INTERVAL, 3);
+    }
+
+    public int getServerFlowControlMessageCount() {
+        return getInt(SERVER_FLOW_CONTROL_MESSAGE_COUNT, 10000);
+    }
+
+    public int getServerFlowControlMessageSize() {
+        return getInt(SERVER_FLOW_CONTROL_MESSAGE_SIZE, 64);
+    }
 }
