@@ -1,9 +1,12 @@
 package com.owl.kafka.push.server.biz;
 
+import com.owl.kafka.client.service.RegistryService;
 import com.owl.kafka.client.zookeeper.KafkaZookeeperConfig;
+import com.owl.kafka.client.zookeeper.ZookeeperClient;
 import com.owl.kafka.consumer.ConsumerConfig;
 import com.owl.kafka.consumer.service.MessageListenerService;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
+import com.owl.kafka.push.server.biz.registry.RegistryCenter;
 import com.owl.kafka.push.server.biz.service.DLQService;
 import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import com.owl.kafka.push.server.consumer.AcknowledgeMessageListenerService;
@@ -23,6 +26,8 @@ public class PushServer {
 
     private final DLQService dlqService;
 
+    private final PushCenter pushCenter;
+
     public PushServer(){
         String kafkaServerList = ServerConfigs.I.getServerKafkaServerList();
         if(StringUtils.isBlank(kafkaServerList)){
@@ -32,20 +37,25 @@ public class PushServer {
         consumerConfigs.setAutoCommit(false);
         this.consumer = new PushServerConsumer(consumerConfigs);
         this.nettyServer = new NettyServer(consumer);
-        this.messageListenerService = new AcknowledgeMessageListenerService();
+
+        this.pushCenter = new PushCenter();
+        this.messageListenerService = new AcknowledgeMessageListenerService(pushCenter);
         this.consumer.setMessageListenerService(messageListenerService);
-        //
-        this.dlqService = new DLQService(kafkaServerList, ServerConfigs.I.getServerTopic(), ServerConfigs.I.getServerGroupId(), ServerConfigs.I.getZookeeperServerList());
+
+        this.dlqService = new DLQService(kafkaServerList, ServerConfigs.I.getServerTopic(), ServerConfigs.I.getServerGroupId());
+
         InstanceHolder.I.setDLQService(this.dlqService);
     }
 
     public void start(){
+        this.pushCenter.start();
         this.nettyServer.start();
         this.consumer.start();
     }
 
     public void close(){
         this.consumer.close();
+        RegistryCenter.I.close();
         this.nettyServer.close();
         this.dlqService.close();
     }

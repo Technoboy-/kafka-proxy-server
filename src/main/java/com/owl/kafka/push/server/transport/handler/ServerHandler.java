@@ -4,6 +4,7 @@ import com.owl.kafka.client.transport.NettyConnection;
 import com.owl.kafka.client.transport.handler.MessageDispatcher;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.push.server.biz.registry.RegistryCenter;
+import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

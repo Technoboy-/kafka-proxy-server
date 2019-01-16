@@ -27,6 +27,10 @@ public class ServerRegistry {
         RegisterMetadata registerMetadata = new RegisterMetadata();
         registerMetadata.setPath(String.format(ServerConfigs.I.ZOOKEEPER_PROVIDERS, ServerConfigs.I.getServerTopic()));
         registerMetadata.setAddress(address);
+        this.register(registerMetadata);
+    }
+
+    public void register(RegisterMetadata registerMetadata){
         this.registryService.register(registerMetadata);
     }
 
@@ -35,6 +39,10 @@ public class ServerRegistry {
         RegisterMetadata registerMetadata = new RegisterMetadata();
         registerMetadata.setPath(String.format(ServerConfigs.I.ZOOKEEPER_PROVIDERS, ServerConfigs.I.getServerTopic()));
         registerMetadata.setAddress(address);
+        this.unregister(registerMetadata);
+    }
+
+    public void unregister(RegisterMetadata registerMetadata){
         this.registryService.unregister(registerMetadata);
     }
 

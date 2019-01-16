@@ -5,6 +5,7 @@ import com.owl.kafka.client.transport.codec.PacketEncoder;
 import com.owl.kafka.client.transport.handler.MessageDispatcher;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.registry.RegistryCenter;
+import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import com.owl.kafka.push.server.transport.NettyTcpServer;
 import com.owl.kafka.push.server.transport.handler.*;
 import com.owl.kafka.client.transport.protocol.Command;

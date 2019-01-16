@@ -31,13 +31,11 @@ public class DLQService {
 
     private DLQConsumer dlqConsumer;
 
-    private final ZookeeperClient zookeeperClient;
-
     private final Producer<byte[], byte[]> producer;
 
     private final String topic;
 
-    public DLQService(String bootstrapServers, String topic, String groupId, String zookeeperServers){
+    public DLQService(String bootstrapServers, String topic, String groupId){
         //config for consumer
         this.topic = topic + "-dlq";
 
@@ -46,21 +44,18 @@ public class DLQService {
         producerConfigs.put("bootstrap.servers", bootstrapServers);
         this.producer = new org.apache.kafka.clients.producer.KafkaProducer(producerConfigs);
 
-        this.zookeeperClient = new ZookeeperClient(zookeeperServers, ZookeeperClient.PUSH_SERVER_NAMESPACE, 30000, 15000);
-
-        this.dlqConsumer = new DLQConsumer(bootstrapServers, this.topic, groupId, zookeeperClient);
+        this.dlqConsumer = new DLQConsumer(bootstrapServers, this.topic, groupId);
     }
 
     public void close(){
         this.producer.close();
         this.dlqConsumer.close();
-        this.zookeeperClient.close();
     }
 
     public Record<byte[], byte[]> view(long msgId){
         try {
             String dlp = String.format(this.topic + DLQ_DATA_PATH, msgId);
-            byte[] data = zookeeperClient.getData(dlp);
+            byte[] data = InstanceHolder.I.getZookeeperClient().getData(dlp);
             ByteBuffer wrap = ByteBuffer.wrap(data);
             long offset = wrap.getLong();
             ConsumerRecord<byte[], byte[]> record = dlqConsumer.seek(offset);
@@ -86,7 +81,7 @@ public class DLQService {
                 public void onCompletion(RecordMetadata metadata, Exception exception) {
                     if (exception != null) {
                         try {
-                            zookeeperClient.createPersistent(dlp, toByteArray(metadata.offset()));
+                            InstanceHolder.I.getZookeeperClient().createPersistent(dlp, toByteArray(metadata.offset()));
                         } catch (Exception ex) {
                             LOG.error("write to zk path : {}, data : {}, error : {}", new Object[]{dlp, metadata.offset(), ex});
                         }

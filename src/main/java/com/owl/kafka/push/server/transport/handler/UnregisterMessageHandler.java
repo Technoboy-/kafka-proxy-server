@@ -2,6 +2,7 @@ package com.owl.kafka.push.server.transport.handler;
 
 import com.owl.kafka.client.transport.Connection;
 import com.owl.kafka.push.server.biz.registry.RegistryCenter;
+import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import com.owl.kafka.util.NetUtils;
 import com.owl.kafka.client.transport.handler.CommonMessageHandler;
 import com.owl.kafka.client.transport.protocol.Packet;

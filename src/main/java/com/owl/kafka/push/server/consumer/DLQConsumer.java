@@ -4,6 +4,7 @@ import com.owl.kafka.client.service.RegisterMetadata;
 import com.owl.kafka.client.transport.Address;
 import com.owl.kafka.client.zookeeper.ZookeeperClient;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
+import com.owl.kafka.push.server.biz.registry.RegistryCenter;
 import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import com.owl.kafka.push.server.biz.service.LeaderElectionService;
 import com.owl.kafka.util.NetUtils;
@@ -31,8 +32,6 @@ public class DLQConsumer implements LeaderLatchListener, Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(DLQConsumer.class);
 
     private final LeaderElectionService leaderElectionService;
-    private final ZookeeperClient zookeeperClient;
-
 
     private Consumer<byte[], byte[]> consumer;
 
@@ -44,16 +43,15 @@ public class DLQConsumer implements LeaderLatchListener, Runnable {
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
-
-    public DLQConsumer(String bootstrapServers, String topic, String groupId, ZookeeperClient zookeeperClient){
+    public DLQConsumer(String bootstrapServers, String topic, String groupId){
         this.bootstrapServers = bootstrapServers;
         this.topic = topic;
         this.groupId = groupId;
-        this.zookeeperClient = zookeeperClient;
         //
-        this.supervisor = new Thread(this, "dlq-supervisor");
+        this.supervisor = new Thread(this, "dlq-consumer-selector");
         this.supervisor.setDaemon(true);
-        this.leaderElectionService = new LeaderElectionService(zookeeperClient.getClient(), "", this);
+        //TODO PATH
+        this.leaderElectionService = new LeaderElectionService(InstanceHolder.I.getZookeeperClient().getClient(), "", this);
         this.isRunning.compareAndSet(false, true);
         this.supervisor.start();
     }
@@ -61,12 +59,11 @@ public class DLQConsumer implements LeaderLatchListener, Runnable {
 
     @Override
     public void isLeader() {
-        //
         RegisterMetadata metadata = new RegisterMetadata();
         Address address = new Address(NetUtils.getLocalIp(), ServerConfigs.I.getServerPort());
         metadata.setPath(String.format(ServerConfigs.I.ZOOKEEPER_CONSUMERS, this.topic));
         metadata.setAddress(address);
-        InstanceHolder.I.getRegistryService().register(metadata);
+        RegistryCenter.I.getServerRegistry().register(metadata);
         //
         Map<String, Object> consumerConfigs = new HashMap<>();
         consumerConfigs.put("bootstrap.servers", bootstrapServers);
@@ -102,12 +99,11 @@ public class DLQConsumer implements LeaderLatchListener, Runnable {
 
     @Override
     public void notLeader() {
-        //
         RegisterMetadata metadata = new RegisterMetadata();
         Address address = new Address(NetUtils.getLocalIp(), ServerConfigs.I.getServerPort());
         metadata.setPath(String.format(ServerConfigs.I.ZOOKEEPER_CONSUMERS, this.topic));
         metadata.setAddress(address);
-        InstanceHolder.I.getRegistryService().unregister(metadata);
+        RegistryCenter.I.getServerRegistry().unregister(metadata);
         //
         if(this.consumer != null){
             this.consumer.close();
@@ -115,8 +111,8 @@ public class DLQConsumer implements LeaderLatchListener, Runnable {
     }
 
     public void close(){
-        leaderElectionService.close();
-        isRunning.compareAndSet(true, false);
+        this.isRunning.compareAndSet(true, false);
+        this.leaderElectionService.close();
     }
 
     @Override

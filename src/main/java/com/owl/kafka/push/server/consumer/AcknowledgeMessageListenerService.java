@@ -11,9 +11,8 @@ public class AcknowledgeMessageListenerService<K, V> extends RebalanceMessageLis
 
     private final PushCenter pushCenter;
 
-    public AcknowledgeMessageListenerService(){
-        this.pushCenter = new PushCenter();
-        this.pushCenter.start();
+    public AcknowledgeMessageListenerService(PushCenter pushCenter){
+        this.pushCenter = pushCenter;
     }
 
     @Override
@@ -27,7 +26,7 @@ public class AcknowledgeMessageListenerService<K, V> extends RebalanceMessageLis
 
     @Override
     public void close() {
-        this.pushCenter.close();
+        //NOP
     }
 
 }

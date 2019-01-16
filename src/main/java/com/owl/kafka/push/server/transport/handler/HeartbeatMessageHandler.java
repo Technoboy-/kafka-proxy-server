@@ -5,6 +5,7 @@ import com.owl.kafka.client.transport.handler.CommonMessageHandler;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.client.util.Packets;
 import com.owl.kafka.push.server.biz.registry.RegistryCenter;
+import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import com.owl.kafka.util.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
