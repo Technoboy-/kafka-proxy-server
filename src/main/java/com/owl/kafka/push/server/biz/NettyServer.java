@@ -42,6 +42,7 @@ public class NettyServer extends NettyTcpServer {
         dispatcher.register(Command.UNREGISTER, new UnregisterMessageHandler());
         dispatcher.register(Command.ACK, new AckMessageHandler(consumer));
         dispatcher.register(Command.VIEW, new ViewMessageHandler());
+        dispatcher.register(Command.PULL, new PullMessageHandler());
         return dispatcher;
     }
 

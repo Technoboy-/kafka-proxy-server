@@ -1,15 +1,14 @@
 package com.owl.kafka.push.server.biz;
 
-import com.owl.kafka.client.service.RegistryService;
 import com.owl.kafka.client.zookeeper.KafkaZookeeperConfig;
-import com.owl.kafka.client.zookeeper.ZookeeperClient;
 import com.owl.kafka.consumer.ConsumerConfig;
 import com.owl.kafka.consumer.service.MessageListenerService;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.registry.RegistryCenter;
 import com.owl.kafka.push.server.biz.service.DLQService;
 import com.owl.kafka.push.server.biz.service.InstanceHolder;
-import com.owl.kafka.push.server.consumer.AcknowledgeMessageListenerService;
+import com.owl.kafka.push.server.consumer.AcknowledgeMessageListenerPullService;
+import com.owl.kafka.push.server.consumer.AcknowledgeMessageListenerPushService;
 import com.owl.kafka.push.server.consumer.PushServerConsumer;
 import com.owl.kafka.util.StringUtils;
 
@@ -39,7 +38,11 @@ public class PushServer {
         this.nettyServer = new NettyServer(consumer);
 
         this.pushCenter = new PushCenter();
-        this.messageListenerService = new AcknowledgeMessageListenerService(pushCenter);
+
+        //push model
+//        this.messageListenerService = new AcknowledgeMessageListenerPushService(pushCenter);
+        //pull model
+        this.messageListenerService = new AcknowledgeMessageListenerPullService();
         this.consumer.setMessageListenerService(messageListenerService);
 
         this.dlqService = new DLQService(kafkaServerList, ServerConfigs.I.getServerTopic(), ServerConfigs.I.getServerGroupId());

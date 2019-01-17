@@ -1,24 +1,19 @@
 package com.owl.kafka.push.server.consumer;
 
-import com.owl.kafka.push.server.biz.PushCenter;
 import com.owl.kafka.consumer.service.RebalanceMessageListenerService;
+import com.owl.kafka.push.server.biz.PullCenter;
+import com.owl.kafka.push.server.biz.PushCenter;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 /**
  * @Author: Tboy
  */
-public class AcknowledgeMessageListenerService<K, V> extends RebalanceMessageListenerService<K, V>{
-
-    private final PushCenter pushCenter;
-
-    public AcknowledgeMessageListenerService(PushCenter pushCenter){
-        this.pushCenter = pushCenter;
-    }
+public class AcknowledgeMessageListenerPullService<K, V> extends RebalanceMessageListenerService<K, V>{
 
     @Override
     public void onMessage(ConsumerRecord<byte[], byte[]> record) {
         try {
-            pushCenter.getPushQueue().put(record);
+            PullCenter.I.getPullQueue().put(record);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
