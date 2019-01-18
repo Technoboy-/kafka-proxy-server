@@ -1,6 +1,6 @@
 package com.owl.kafka.push.server.boostrap;
 
-import com.owl.kafka.push.server.biz.PushServer;
+import com.owl.kafka.push.server.biz.push.PushServer;
 
 /**
  * @Author: Tboy

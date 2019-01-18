@@ -3,7 +3,7 @@ package com.owl.kafka.push.server.biz.service;
 import com.owl.kafka.push.server.biz.bo.ResendPacket;
 import com.owl.kafka.client.transport.exceptions.ChannelInactiveException;
 import com.owl.kafka.client.transport.protocol.Packet;
-import com.owl.kafka.push.server.biz.PushCenter;
+import com.owl.kafka.push.server.biz.push.PushCenter;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,12 +1,11 @@
 package com.owl.kafka.push.server.biz.service;
 
 import com.owl.kafka.client.transport.protocol.Packet;
-import com.owl.kafka.client.zookeeper.ZookeeperClient;
 import com.owl.kafka.consumer.Record;
 import com.owl.kafka.push.server.biz.bo.ResendPacket;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.consumer.DLQConsumer;
-import com.owl.kafka.push.server.consumer.PushServerConsumer;
+import com.owl.kafka.push.server.consumer.ProxyConsumer;
 import com.owl.kafka.util.Preconditions;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.Callback;
@@ -25,7 +24,7 @@ import java.util.Map;
  */
 public class DLQService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PushServerConsumer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProxyConsumer.class);
 
     private static final String DLQ_DATA_PATH = "/%s";  //-dlq/msgId
 
@@ -74,6 +73,30 @@ public class DLQService {
         try {
             Packet packet = resendPacket.getPacket();
             String dlp = String.format(this.topic + DLQ_DATA_PATH, resendPacket.getMsgId());
+            ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(this.topic, 0, packet.getKey(), packet.getValue());
+            this.producer.send(record, new Callback() {
+
+                @Override
+                public void onCompletion(RecordMetadata metadata, Exception exception) {
+                    if (exception != null) {
+                        try {
+                            InstanceHolder.I.getZookeeperClient().createPersistent(dlp, toByteArray(metadata.offset()));
+                        } catch (Exception ex) {
+                            LOG.error("write to zk path : {}, data : {}, error : {}", new Object[]{dlp, metadata.offset(), ex});
+                        }
+                    } else {
+                        LOG.error("write to kafka error", exception);
+                    }
+                }
+            });
+        } catch (Exception ex){
+            LOG.error("write error", ex);
+        }
+    }
+
+    public void write(Packet packet){
+        try {
+            String dlp = String.format(this.topic + DLQ_DATA_PATH, packet.getMsgId());
             ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(this.topic, 0, packet.getKey(), packet.getValue());
             this.producer.send(record, new Callback() {
 

@@ -1,4 +1,4 @@
-package com.owl.kafka.push.server.biz;
+package com.owl.kafka.push.server.biz.push;
 
 import com.owl.kafka.client.service.DefaultRetryPolicy;
 import com.owl.kafka.client.service.IdService;

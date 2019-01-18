@@ -19,7 +19,7 @@ public class UnregisterMessageHandler extends CommonMessageHandler {
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
         if(LOGGER.isDebugEnabled()){
-            LOGGER.debug("received unregister : {}, from : {}", packet, NetUtils.getRemoteAddress(connection.getChannel()));
+            LOGGER.debug("received unregister message : {}, from : {}", packet, NetUtils.getRemoteAddress(connection.getChannel()));
         }
         RegistryCenter.I.getClientRegistry().unregister(connection);
     }

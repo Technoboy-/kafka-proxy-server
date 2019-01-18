@@ -1,4 +1,4 @@
-package com.owl.kafka.push.server.biz;
+package com.owl.kafka.push.server.biz.pull;
 
 import com.owl.kafka.client.service.IdService;
 import com.owl.kafka.client.transport.protocol.Command;
@@ -37,29 +37,36 @@ public class PullCenter{
         return retryQueue;
     }
 
-    public List<Packet> pull(long messageCount, long messageSize) throws InterruptedException {
+    public List<Packet> pull(long messageCount, long messageSize) {
         List<Packet> results = new ArrayList<>();
         while(messageCount < results.size() && calculateSize(results) < messageSize){
-            Packet take = take();
-            results.add(take);
+            Packet poll = poll();
+            if(poll == null){
+                break;
+            } else{
+                results.add(poll);
+            }
         }
         return results;
     }
 
-    private Packet take() throws InterruptedException{
+    private Packet poll() {
         Packet packet = retryQueue.peek();
         if(packet != null){
             retryQueue.poll();
         } else{
-            ConsumerRecord<byte[], byte[]> record = pullQueue.take();
-            packet = new Packet();
-            //
-            packet.setCmd(Command.PUSH.getCmd());
-            packet.setMsgId(IdService.I.getId());
-            Header header = new Header(record.topic(), record.partition(), record.offset());
-            packet.setHeader(SerializerImpl.getFastJsonSerializer().serialize(header));
-            packet.setKey(record.key());
-            packet.setValue(record.value());
+            ConsumerRecord<byte[], byte[]> record = pullQueue.poll();
+            if(record != null){
+                packet = new Packet();
+                //
+                packet.setCmd(Command.PUSH.getCmd());
+                packet.setMsgId(IdService.I.getId());
+                Header header = new Header(record.topic(), record.partition(), record.offset());
+                header.setRepost(1);
+                packet.setHeader(SerializerImpl.getFastJsonSerializer().serialize(header));
+                packet.setKey(record.key());
+                packet.setValue(record.value());
+            }
             //
         }
         return packet;

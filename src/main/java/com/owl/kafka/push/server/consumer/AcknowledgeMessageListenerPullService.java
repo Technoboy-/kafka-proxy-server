@@ -1,8 +1,7 @@
 package com.owl.kafka.push.server.consumer;
 
 import com.owl.kafka.consumer.service.RebalanceMessageListenerService;
-import com.owl.kafka.push.server.biz.PullCenter;
-import com.owl.kafka.push.server.biz.PushCenter;
+import com.owl.kafka.push.server.biz.pull.PullCenter;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 /**

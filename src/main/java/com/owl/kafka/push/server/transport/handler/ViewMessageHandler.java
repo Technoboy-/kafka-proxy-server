@@ -18,7 +18,7 @@ public class ViewMessageHandler extends CommonMessageHandler {
 
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
-        LOGGER.debug("received view msgId : {}", packet.getMsgId());
+        LOGGER.debug("received view message : {}", packet.getMsgId());
         Record<byte[], byte[]> record = InstanceHolder.I.getDLQService().view(packet.getMsgId());
         if(record != null){
             connection.send(Packets.toViewPacket(packet.getMsgId(), record));

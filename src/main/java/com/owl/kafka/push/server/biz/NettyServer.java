@@ -5,11 +5,10 @@ import com.owl.kafka.client.transport.codec.PacketEncoder;
 import com.owl.kafka.client.transport.handler.MessageDispatcher;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.registry.RegistryCenter;
-import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import com.owl.kafka.push.server.transport.NettyTcpServer;
 import com.owl.kafka.push.server.transport.handler.*;
 import com.owl.kafka.client.transport.protocol.Command;
-import com.owl.kafka.push.server.consumer.PushServerConsumer;
+import com.owl.kafka.push.server.consumer.ProxyConsumer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
@@ -31,18 +30,19 @@ public class NettyServer extends NettyTcpServer {
 
     private final ChannelHandler handler;
 
-    public NettyServer(PushServerConsumer consumer) {
+    public NettyServer(ProxyConsumer consumer) {
         super(port, bossNum, workerNum);
         this.handler = new ServerHandler(newDispatcher(consumer));
     }
 
-    private MessageDispatcher newDispatcher(PushServerConsumer consumer){
+    private MessageDispatcher newDispatcher(ProxyConsumer consumer){
         MessageDispatcher dispatcher = new MessageDispatcher();
         dispatcher.register(Command.PING, new HeartbeatMessageHandler());
         dispatcher.register(Command.UNREGISTER, new UnregisterMessageHandler());
         dispatcher.register(Command.ACK, new AckMessageHandler(consumer));
         dispatcher.register(Command.VIEW, new ViewMessageHandler());
         dispatcher.register(Command.PULL, new PullMessageHandler());
+        dispatcher.register(Command.SEND_BACK, new SendBackMessageHandler());
         return dispatcher;
     }
 

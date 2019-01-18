@@ -1,15 +1,15 @@
-package com.owl.kafka.push.server.biz;
+package com.owl.kafka.push.server.biz.push;
 
 import com.owl.kafka.client.zookeeper.KafkaZookeeperConfig;
 import com.owl.kafka.consumer.ConsumerConfig;
 import com.owl.kafka.consumer.service.MessageListenerService;
+import com.owl.kafka.push.server.biz.NettyServer;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.registry.RegistryCenter;
 import com.owl.kafka.push.server.biz.service.DLQService;
 import com.owl.kafka.push.server.biz.service.InstanceHolder;
-import com.owl.kafka.push.server.consumer.AcknowledgeMessageListenerPullService;
 import com.owl.kafka.push.server.consumer.AcknowledgeMessageListenerPushService;
-import com.owl.kafka.push.server.consumer.PushServerConsumer;
+import com.owl.kafka.push.server.consumer.ProxyConsumer;
 import com.owl.kafka.util.StringUtils;
 
 /**
@@ -17,7 +17,7 @@ import com.owl.kafka.util.StringUtils;
  */
 public class PushServer {
 
-    private final PushServerConsumer consumer;
+    private final ProxyConsumer consumer;
 
     private final MessageListenerService messageListenerService;
 
@@ -34,15 +34,12 @@ public class PushServer {
         }
         ConsumerConfig consumerConfigs = new ConsumerConfig(kafkaServerList, ServerConfigs.I.getServerTopic(), ServerConfigs.I.getServerGroupId());
         consumerConfigs.setAutoCommit(false);
-        this.consumer = new PushServerConsumer(consumerConfigs);
+        this.consumer = new ProxyConsumer(consumerConfigs);
         this.nettyServer = new NettyServer(consumer);
 
         this.pushCenter = new PushCenter();
 
-        //push model
-//        this.messageListenerService = new AcknowledgeMessageListenerPushService(pushCenter);
-        //pull model
-        this.messageListenerService = new AcknowledgeMessageListenerPullService();
+        this.messageListenerService = new AcknowledgeMessageListenerPushService(pushCenter);
         this.consumer.setMessageListenerService(messageListenerService);
 
         this.dlqService = new DLQService(kafkaServerList, ServerConfigs.I.getServerTopic(), ServerConfigs.I.getServerGroupId());
