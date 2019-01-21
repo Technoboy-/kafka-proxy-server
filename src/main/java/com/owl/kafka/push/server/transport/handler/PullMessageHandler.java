@@ -30,9 +30,7 @@ public class PullMessageHandler extends CommonMessageHandler {
         PullRequest pullRequest = new PullRequest(connection, packet, 15 * 1000);
         List<Packet> records = PullCenter.I.pull(pullRequest, isSuspend);
         //
-        if(CollectionUtils.isEmpty(records) && isSuspend){
-            connection.send(Packets.noNewMsg(packet.getMsgId()));
-        } else{
+        if(!CollectionUtils.isEmpty(records)){
             for(Packet record : records){
                 try {
                     connection.send(record);
@@ -41,7 +39,6 @@ public class PullMessageHandler extends CommonMessageHandler {
                 }
             }
         }
-
     }
 
 }

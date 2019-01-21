@@ -46,13 +46,13 @@ public class AckMessageHandler extends CommonMessageHandler {
 
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
-        LOGGER.debug("received ack msgId : {}", packet.getMsgId());
+        LOGGER.debug("received ack msg : {}", packet);
         Packet remove = MessageHolder.fastRemove(packet);
         if(remove.getHeader() != null && remove.getHeader().length > 0){
             Header header = (Header) SerializerImpl.getFastJsonSerializer().deserialize(remove.getHeader(), Header.class);
             acknowledge(header);
         } else{
-            LOGGER.warn("MessageHolder not found ack msgId : {}, just ignore", packet.getMsgId());
+            LOGGER.warn("MessageHolder not found ack opaque : {}, just ignore", packet.getOpaque());
         }
     }
 

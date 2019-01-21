@@ -78,10 +78,9 @@ public class PullCenter{
             if(record != null){
                 packet = new Packet();
                 //
-                packet.setCmd(Command.PUSH.getCmd());
-                packet.setMsgId(IdService.I.getId());
-                Header header = new Header(record.topic(), record.partition(), record.offset());
-                header.setRepost((byte)1);
+                packet.setCmd(Command.PULL.getCmd());
+                packet.setOpaque(IdService.I.getId());
+                Header header = new Header(record.topic(), record.partition(), record.offset(), IdService.I.getId());
                 packet.setHeader(SerializerImpl.getFastJsonSerializer().serialize(header));
                 packet.setKey(record.key());
                 packet.setValue(record.value());

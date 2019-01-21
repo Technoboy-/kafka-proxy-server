@@ -96,9 +96,9 @@ public class DLQService {
         }
     }
 
-    public void write(Packet packet){
+    public void write(long msgId, Packet packet){
         try {
-            String dlp = String.format(this.topic + DLQ_DATA_PATH, packet.getMsgId());
+            String dlp = String.format(this.topic + DLQ_DATA_PATH, msgId);
             ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(this.topic, 0, packet.getKey(), packet.getValue());
             this.producer.send(record, new Callback() {
 

@@ -33,7 +33,7 @@ public class PullRequestHoldService {
         this.worker = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(!start.get()){
+                while(start.get()){
                     try {
                         Thread.sleep(5 * 1000);
                         checkRequestHolder();
@@ -83,7 +83,7 @@ public class PullRequestHoldService {
                 }
                 execute = true;
             } else if(System.currentTimeMillis() > (request.getSuspendTimestamp() + request.getTimeoutMs())){
-                request.getConnection().send(Packets.noNewMsg(request.getPacket().getMsgId()));
+                request.getConnection().send(Packets.noNewMsg(request.getPacket().getOpaque()));
                 execute = true;
             }
         } catch (ChannelInactiveException e) {

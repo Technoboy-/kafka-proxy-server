@@ -26,7 +26,7 @@ public class SendBackMessageHandler extends CommonMessageHandler {
         }
         Header header = (Header)SerializerImpl.getFastJsonSerializer().deserialize(packet.getHeader(), Header.class);
         if(header.getRepost() >= 10){
-            InstanceHolder.I.getDLQService().write(packet);
+            InstanceHolder.I.getDLQService().write(header.getMsgId(), packet);
         } else{
             header.setRepost((byte)(header.getRepost() + 1));
             PullCenter.I.reputMessage(packet);

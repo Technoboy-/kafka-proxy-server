@@ -118,7 +118,7 @@ public class MappedFileManager {
         reset(store, length);
         store.put(packet.getVersion());
         store.put(packet.getCmd());
-        store.putLong(packet.getMsgId());
+        store.putLong(packet.getOpaque());
         store.putInt(packet.getHeader().length);
         store.put(packet.getHeader());
         store.putInt(packet.getKey().length);

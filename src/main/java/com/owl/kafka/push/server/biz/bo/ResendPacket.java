@@ -22,8 +22,8 @@ public class ResendPacket implements Comparable<ResendPacket> {
         this.msgId = msgId;
     }
 
-    public ResendPacket(Packet packet){
-        this.msgId = packet.getMsgId();
+    public ResendPacket(long msgId, Packet packet){
+        this.msgId = msgId;
         this.repost = 1;
         this.timestamp = SystemClock.millisClock().now();
         this.packet = packet;
