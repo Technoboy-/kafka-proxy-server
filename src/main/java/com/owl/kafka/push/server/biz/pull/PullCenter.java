@@ -5,7 +5,10 @@ import com.owl.kafka.client.transport.protocol.Command;
 import com.owl.kafka.client.transport.protocol.Header;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
+import com.owl.kafka.push.server.biz.service.PullRequestHoldService;
+import com.owl.kafka.push.server.biz.bo.PullRequest;
 import com.owl.kafka.serializer.SerializerImpl;
+import com.owl.kafka.util.CollectionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,17 +32,33 @@ public class PullCenter{
 
     private final LinkedBlockingQueue<ConsumerRecord<byte[], byte[]>> pullQueue = new LinkedBlockingQueue<>(queueSize);
 
-    public LinkedBlockingQueue<ConsumerRecord<byte[], byte[]>> getPullQueue() {
-        return pullQueue;
+    private final int singleMessageSize = 1024 * 1024 * 8;
+
+    private final PullRequestHoldService pullRequestHoldService = new PullRequestHoldService();
+
+    public void putMessage(ConsumerRecord<byte[], byte[]> record) throws InterruptedException{
+        this.pullQueue.put(record);
+        this.pullRequestHoldService.notifyMessageArriving();
     }
 
-    public LinkedBlockingQueue<Packet> getRetryQueue() {
-        return retryQueue;
+    public void reputMessage(Packet packet) throws InterruptedException{
+        this.retryQueue.put(packet);
     }
 
-    public List<Packet> pull(long messageCount, long messageSize) {
+    public List<Packet> pull(PullRequest request, boolean isSuspend) {
+        int messageCount = 10;
+        List<Packet> result = this.pull(messageCount, singleMessageSize * messageCount);
+        if(CollectionUtils.isEmpty(result) && isSuspend){
+            pullRequestHoldService.suspend(request);
+            return null;
+        } else{
+            return result;
+        }
+    }
+
+    private List<Packet> pull(long messageCount, long messageSize) {
         List<Packet> results = new ArrayList<>();
-        while(messageCount < results.size() && calculateSize(results) < messageSize){
+        while(messageCount < results.size() || calculateSize(results) < messageSize){
             Packet poll = poll();
             if(poll == null){
                 break;
@@ -62,12 +81,11 @@ public class PullCenter{
                 packet.setCmd(Command.PUSH.getCmd());
                 packet.setMsgId(IdService.I.getId());
                 Header header = new Header(record.topic(), record.partition(), record.offset());
-                header.setRepost(1);
+                header.setRepost((byte)1);
                 packet.setHeader(SerializerImpl.getFastJsonSerializer().serialize(header));
                 packet.setKey(record.key());
                 packet.setValue(record.value());
             }
-            //
         }
         return packet;
     }
@@ -78,5 +96,9 @@ public class PullCenter{
             size = size + 1 + 1 + 8 + record.getHeader().length + record.getKey().length + record.getValue().length;
         }
         return size;
+    }
+
+    public void close(){
+        this.pullRequestHoldService.close();
     }
 }

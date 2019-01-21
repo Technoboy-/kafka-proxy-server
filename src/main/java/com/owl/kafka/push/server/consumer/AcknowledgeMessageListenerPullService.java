@@ -12,7 +12,7 @@ public class AcknowledgeMessageListenerPullService<K, V> extends RebalanceMessag
     @Override
     public void onMessage(ConsumerRecord<byte[], byte[]> record) {
         try {
-            PullCenter.I.getPullQueue().put(record);
+            PullCenter.I.putMessage(record);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -20,7 +20,7 @@ public class AcknowledgeMessageListenerPullService<K, V> extends RebalanceMessag
 
     @Override
     public void close() {
-        //NOP
+        PullCenter.I.close();
     }
 
 }

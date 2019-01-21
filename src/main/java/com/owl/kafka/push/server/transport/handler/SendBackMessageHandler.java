@@ -28,8 +28,8 @@ public class SendBackMessageHandler extends CommonMessageHandler {
         if(header.getRepost() >= 10){
             InstanceHolder.I.getDLQService().write(packet);
         } else{
-            header.setRepost(header.getRepost() + 1);
-            PullCenter.I.getRetryQueue().put(packet);
+            header.setRepost((byte)(header.getRepost() + 1));
+            PullCenter.I.reputMessage(packet);
         }
 
     }

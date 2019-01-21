@@ -5,13 +5,13 @@ import com.owl.kafka.client.transport.exceptions.ChannelInactiveException;
 import com.owl.kafka.client.transport.handler.CommonMessageHandler;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.client.util.Packets;
+import com.owl.kafka.push.server.biz.bo.PullRequest;
 import com.owl.kafka.push.server.biz.pull.PullCenter;
 import com.owl.kafka.util.CollectionUtils;
 import com.owl.kafka.util.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,15 +26,18 @@ public class PullMessageHandler extends CommonMessageHandler {
         if(LOGGER.isDebugEnabled()){
             LOGGER.debug("received pull message : {}, from : {}", packet, NetUtils.getRemoteAddress(connection.getChannel()));
         }
-        List<Packet> records = PullCenter.I.pull(10, 1024 * 512);
-        if(CollectionUtils.isEmpty(records)){
-            connection.send(Packets.noMsg());
+        final boolean isSuspend = true;
+        PullRequest pullRequest = new PullRequest(connection, packet, 15 * 1000);
+        List<Packet> records = PullCenter.I.pull(pullRequest, isSuspend);
+        //
+        if(CollectionUtils.isEmpty(records) && isSuspend){
+            connection.send(Packets.noNewMsg(packet.getMsgId()));
         } else{
             for(Packet record : records){
                 try {
                     connection.send(record);
                 } catch (ChannelInactiveException ex){
-                    PullCenter.I.getRetryQueue().put(record);
+                    PullCenter.I.reputMessage(record);
                 }
             }
         }
