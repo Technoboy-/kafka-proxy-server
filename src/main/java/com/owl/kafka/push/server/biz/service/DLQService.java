@@ -41,6 +41,8 @@ public class DLQService {
         //config for producer
         Map<String, Object> producerConfigs = new HashMap<>();
         producerConfigs.put("bootstrap.servers", bootstrapServers);
+        producerConfigs.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+        producerConfigs.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
         this.producer = new org.apache.kafka.clients.producer.KafkaProducer(producerConfigs);
 
         this.dlqConsumer = new DLQConsumer(bootstrapServers, this.topic, groupId);

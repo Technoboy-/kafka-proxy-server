@@ -50,8 +50,9 @@ public class DLQConsumer implements LeaderLatchListener, Runnable {
         //
         this.supervisor = new Thread(this, "dlq-consumer-selector");
         this.supervisor.setDaemon(true);
-        //TODO PATH
-        this.leaderElectionService = new LeaderElectionService(InstanceHolder.I.getZookeeperClient().getClient(), "", this);
+        //
+        final String zkPath = "/" + ZookeeperClient.PUSH_SERVER_NAMESPACE + "/" + topic + "/leader";
+        this.leaderElectionService = new LeaderElectionService(InstanceHolder.I.getZookeeperClient().getClient(), zkPath, this);
         this.isRunning.compareAndSet(false, true);
         this.supervisor.start();
     }

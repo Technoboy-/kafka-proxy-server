@@ -30,6 +30,8 @@ public class PullServer {
         if(StringUtils.isBlank(kafkaServerList)){
             kafkaServerList = KafkaZookeeperConfig.getBrokerIds(ServerConfigs.I.getZookeeperServerList(), ServerConfigs.I.getZookeeperNamespace());
         }
+        //TODO
+        final RegistryCenter registryCenter = RegistryCenter.I;
         ConsumerConfig consumerConfigs = new ConsumerConfig(kafkaServerList, ServerConfigs.I.getServerTopic(), ServerConfigs.I.getServerGroupId());
         consumerConfigs.setAutoCommit(false);
         this.consumer = new ProxyConsumer(consumerConfigs);
