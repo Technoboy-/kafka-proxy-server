@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 /**
  * @Author: Tboy
  */
-public class PongMessageHandler extends CommonMessageHandler {
+public class PingMessageHandler extends CommonMessageHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PongMessageHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PingMessageHandler.class);
 
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
