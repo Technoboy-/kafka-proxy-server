@@ -24,7 +24,7 @@ public class PullMessageHandler extends CommonMessageHandler {
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
         if(LOGGER.isDebugEnabled()){
-            LOGGER.debug("received pull message : {}, from : {}", packet, NetUtils.getRemoteAddress(connection.getChannel()));
+            LOGGER.debug("received pull request : {}, from : {}", packet, NetUtils.getRemoteAddress(connection.getChannel()));
         }
         final boolean isSuspend = true;
         PullRequest pullRequest = new PullRequest(connection, packet, 15 * 1000);
@@ -33,6 +33,7 @@ public class PullMessageHandler extends CommonMessageHandler {
         if(!CollectionUtils.isEmpty(records)){
             for(Packet record : records){
                 try {
+                    record.setOpaque(packet.getOpaque());
                     connection.send(record);
                 } catch (ChannelInactiveException ex){
                     PullCenter.I.reputMessage(record);

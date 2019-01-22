@@ -29,6 +29,7 @@ public class SendBackMessageHandler extends CommonMessageHandler {
             InstanceHolder.I.getDLQService().write(header.getMsgId(), packet);
         } else{
             header.setRepost((byte)(header.getRepost() + 1));
+            packet.setHeaderRef(header);
             PullCenter.I.reputMessage(packet);
         }
 

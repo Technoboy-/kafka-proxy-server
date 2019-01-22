@@ -79,6 +79,7 @@ public class PullRequestHoldService {
         try {
             if(!CollectionUtils.isEmpty(result)){
                 for(Packet packet : result){
+                    packet.setOpaque(request.getPacket().getOpaque());
                     request.getConnection().send(packet);
                 }
                 execute = true;

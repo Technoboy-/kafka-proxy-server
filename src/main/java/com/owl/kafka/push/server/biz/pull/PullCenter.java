@@ -46,7 +46,7 @@ public class PullCenter{
     }
 
     public List<Packet> pull(PullRequest request, boolean isSuspend) {
-        int messageCount = 10;
+        int messageCount = 1;
         List<Packet> result = this.pull(messageCount, singleMessageSize * messageCount);
         if(CollectionUtils.isEmpty(result) && isSuspend){
             pullRequestHoldService.suspend(request);
@@ -58,7 +58,7 @@ public class PullCenter{
 
     private List<Packet> pull(long messageCount, long messageSize) {
         List<Packet> results = new ArrayList<>();
-        while(messageCount < results.size() || calculateSize(results) < messageSize){
+        while(results.size() < messageCount || calculateSize(results) < messageSize){
             Packet poll = poll();
             if(poll == null){
                 break;
@@ -79,7 +79,6 @@ public class PullCenter{
                 packet = new Packet();
                 //
                 packet.setCmd(Command.PULL.getCmd());
-                packet.setOpaque(IdService.I.getId());
                 Header header = new Header(record.topic(), record.partition(), record.offset(), IdService.I.getId());
                 packet.setHeader(SerializerImpl.getFastJsonSerializer().serialize(header));
                 packet.setKey(record.key());
