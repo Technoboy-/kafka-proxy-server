@@ -33,7 +33,7 @@ public class PullMessageHandler extends CommonMessageHandler {
         if(!CollectionUtils.isEmpty(records)){
             for(Packet record : records){
                 try {
-                    record.setOpaque(packet.getOpaque());
+                    //ecord.setOpaque(packet.getOpaque());
                     connection.send(record);
                 } catch (ChannelInactiveException ex){
                     PullCenter.I.reputMessage(record);
