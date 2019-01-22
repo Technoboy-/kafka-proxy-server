@@ -139,9 +139,10 @@ public class PushCenter implements Runnable{
             packet.setCmd(Command.PUSH.getCmd());
             packet.setOpaque(IdService.I.getId());
             Header header = new Header(record.topic(), record.partition(), record.offset(), IdService.I.getId());
-            packet.setHeader(SerializerImpl.getFastJsonSerializer().serialize(header));
-            packet.setKey(record.key());
-            packet.setValue(record.value());
+            //TODO
+//            packet.setHeader(SerializerImpl.getFastJsonSerializer().serialize(header));
+//            packet.setKey(record.key());
+//            packet.setValue(record.value());
             //
         }
         return packet;

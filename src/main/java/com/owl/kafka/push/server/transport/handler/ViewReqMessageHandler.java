@@ -14,18 +14,19 @@ import org.slf4j.LoggerFactory;
 /**
  * @Author: Tboy
  */
-public class ViewMessageHandler extends CommonMessageHandler {
+public class ViewReqMessageHandler extends CommonMessageHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ViewMessageHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ViewReqMessageHandler.class);
 
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
         LOGGER.debug("received view message : {}", packet);
-        Header header = (Header) SerializerImpl.getFastJsonSerializer().deserialize(packet.getHeader(), Header.class);
-        Record<byte[], byte[]> record = InstanceHolder.I.getDLQService().view(header.getMsgId());
-        if(record != null){
-            connection.send(Packets.toViewPacket(header.getMsgId(), record));
-        }
+        //todo
+//        Header header = (Header) SerializerImpl.getFastJsonSerializer().deserialize(packet.getHeader(), Header.class);
+//        Record<byte[], byte[]> record = InstanceHolder.I.getDLQService().view(header.getMsgId());
+//        if(record != null){
+//            connection.send(Packets.toViewPacket(header.getMsgId(), record));
+//        }
     }
 
 

@@ -24,14 +24,15 @@ public class SendBackMessageHandler extends CommonMessageHandler {
         if(LOGGER.isDebugEnabled()){
             LOGGER.debug("received sendback message : {}, from : {}", packet, NetUtils.getRemoteAddress(connection.getChannel()));
         }
-        Header header = (Header)SerializerImpl.getFastJsonSerializer().deserialize(packet.getHeader(), Header.class);
-        if(header.getRepost() >= 10){
-            InstanceHolder.I.getDLQService().write(header.getMsgId(), packet);
-        } else{
-            header.setRepost((byte)(header.getRepost() + 1));
-            packet.setHeaderRef(header);
-            PullCenter.I.reputMessage(packet);
-        }
+        //TODO
+//        Header header = (Header)SerializerImpl.getFastJsonSerializer().deserialize(packet.getHeader(), Header.class);
+//        if(header.getRepost() >= 10){
+//            InstanceHolder.I.getDLQService().write(header.getMsgId(), packet);
+//        } else{
+//            header.setRepost((byte)(header.getRepost() + 1));
+//            packet.setHeaderRef(header);
+//            PullCenter.I.reputMessage(packet);
+//        }
 
     }
 }

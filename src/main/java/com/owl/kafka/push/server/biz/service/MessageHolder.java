@@ -32,24 +32,26 @@ public class MessageHolder {
     }
 
     public static void fastPut(Packet packet){
-        if(packet == null){
-            return;
-        }
-        MSG_QUEUE.put(new ResendPacket(packet.getHeaderRef().getMsgId()));
-        long size = packet.getHeader().length + packet.getKey().length + packet.getValue().length;
-        MSG_MAPPER.put(packet.getHeaderRef().getMsgId(), new FastResendMessage(packet.getHeaderRef().getMsgId(), packet.getHeader(), size));
-        COUNT.incrementAndGet();
-        MEMORY_SIZE.addAndGet(size);
+        //TODO
+//        if(packet == null){
+//            return;
+//        }
+//        MSG_QUEUE.put(new ResendPacket(packet.getHeaderRef().getMsgId()));
+//        long size = packet.getHeader().length + packet.getKey().length + packet.getValue().length;
+//        MSG_MAPPER.put(packet.getHeaderRef().getMsgId(), new FastResendMessage(packet.getHeaderRef().getMsgId(), packet.getHeader(), size));
+//        COUNT.incrementAndGet();
+//        MEMORY_SIZE.addAndGet(size);
     }
 
     public static Packet fastRemove(Packet packet){
-        MSG_QUEUE.remove(new ResendPacket(packet.getHeaderRef().getMsgId()));
-        FastResendMessage frm = MSG_MAPPER.remove(packet.getHeaderRef().getMsgId());
-        if(frm != null){
-            packet.setHeader(frm.getHeader());
-            COUNT.decrementAndGet();
-            MEMORY_SIZE.addAndGet(frm.getSize()*(-1));
-        }
+        //todo
+//        MSG_QUEUE.remove(new ResendPacket(packet.getHeaderRef().getMsgId()));
+//        FastResendMessage frm = MSG_MAPPER.remove(packet.getHeaderRef().getMsgId());
+//        if(frm != null){
+//            packet.setHeader(frm.getHeader());
+//            COUNT.decrementAndGet();
+//            MEMORY_SIZE.addAndGet(frm.getSize()*(-1));
+//        }
         return packet;
     }
 }

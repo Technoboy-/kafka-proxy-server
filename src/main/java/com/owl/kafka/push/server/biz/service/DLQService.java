@@ -71,53 +71,55 @@ public class DLQService {
     }
 
     public void write(ResendPacket resendPacket){
-        Preconditions.checkArgument(resendPacket.getRepost() >= ServerConfigs.I.getServerMessageRepostTimes(), "resendPacket must repost more than " + ServerConfigs.I.getServerMessageRepostTimes() + " times");
-        try {
-            Packet packet = resendPacket.getPacket();
-            String dlp = String.format(this.topic + DLQ_DATA_PATH, resendPacket.getMsgId());
-            ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(this.topic, 0, packet.getKey(), packet.getValue());
-            this.producer.send(record, new Callback() {
-
-                @Override
-                public void onCompletion(RecordMetadata metadata, Exception exception) {
-                    if (exception != null) {
-                        try {
-                            InstanceHolder.I.getZookeeperClient().createPersistent(dlp, toByteArray(metadata.offset()));
-                        } catch (Exception ex) {
-                            LOG.error("write to zk path : {}, data : {}, error : {}", new Object[]{dlp, metadata.offset(), ex});
-                        }
-                    } else {
-                        LOG.error("write to kafka error", exception);
-                    }
-                }
-            });
-        } catch (Exception ex){
-            LOG.error("write error", ex);
-        }
+        //TODO
+//        Preconditions.checkArgument(resendPacket.getRepost() >= ServerConfigs.I.getServerMessageRepostTimes(), "resendPacket must repost more than " + ServerConfigs.I.getServerMessageRepostTimes() + " times");
+//        try {
+//            Packet packet = resendPacket.getPacket();
+//            String dlp = String.format(this.topic + DLQ_DATA_PATH, resendPacket.getMsgId());
+//            ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(this.topic, 0, packet.getKey(), packet.getValue());
+//            this.producer.send(record, new Callback() {
+//
+//                @Override
+//                public void onCompletion(RecordMetadata metadata, Exception exception) {
+//                    if (exception != null) {
+//                        try {
+//                            InstanceHolder.I.getZookeeperClient().createPersistent(dlp, toByteArray(metadata.offset()));
+//                        } catch (Exception ex) {
+//                            LOG.error("write to zk path : {}, data : {}, error : {}", new Object[]{dlp, metadata.offset(), ex});
+//                        }
+//                    } else {
+//                        LOG.error("write to kafka error", exception);
+//                    }
+//                }
+//            });
+//        } catch (Exception ex){
+//            LOG.error("write error", ex);
+//        }
     }
 
     public void write(long msgId, Packet packet){
-        try {
-            String dlp = String.format(this.topic + DLQ_DATA_PATH, msgId);
-            ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(this.topic, 0, packet.getKey(), packet.getValue());
-            this.producer.send(record, new Callback() {
-
-                @Override
-                public void onCompletion(RecordMetadata metadata, Exception exception) {
-                    if (exception != null) {
-                        try {
-                            InstanceHolder.I.getZookeeperClient().createPersistent(dlp, toByteArray(metadata.offset()));
-                        } catch (Exception ex) {
-                            LOG.error("write to zk path : {}, data : {}, error : {}", new Object[]{dlp, metadata.offset(), ex});
-                        }
-                    } else {
-                        LOG.error("write to kafka error", exception);
-                    }
-                }
-            });
-        } catch (Exception ex){
-            LOG.error("write error", ex);
-        }
+        //TODO
+//        try {
+//            String dlp = String.format(this.topic + DLQ_DATA_PATH, msgId);
+//            ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(this.topic, 0, packet.getKey(), packet.getValue());
+//            this.producer.send(record, new Callback() {
+//
+//                @Override
+//                public void onCompletion(RecordMetadata metadata, Exception exception) {
+//                    if (exception != null) {
+//                        try {
+//                            InstanceHolder.I.getZookeeperClient().createPersistent(dlp, toByteArray(metadata.offset()));
+//                        } catch (Exception ex) {
+//                            LOG.error("write to zk path : {}, data : {}, error : {}", new Object[]{dlp, metadata.offset(), ex});
+//                        }
+//                    } else {
+//                        LOG.error("write to kafka error", exception);
+//                    }
+//                }
+//            });
+//        } catch (Exception ex){
+//            LOG.error("write error", ex);
+//        }
     }
 
 

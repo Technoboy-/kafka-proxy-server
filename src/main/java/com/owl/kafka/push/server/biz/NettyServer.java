@@ -37,11 +37,11 @@ public class NettyServer extends NettyTcpServer {
 
     private MessageDispatcher newDispatcher(ProxyConsumer consumer){
         MessageDispatcher dispatcher = new MessageDispatcher();
-        dispatcher.register(Command.PING, new HeartbeatMessageHandler());
+        dispatcher.register(Command.PING, new PongMessageHandler());
         dispatcher.register(Command.UNREGISTER, new UnregisterMessageHandler());
         dispatcher.register(Command.ACK, new AckMessageHandler(consumer));
-        dispatcher.register(Command.VIEW, new ViewMessageHandler());
-        dispatcher.register(Command.PULL, new PullMessageHandler());
+        dispatcher.register(Command.VIEW_REQ, new ViewReqMessageHandler());
+        dispatcher.register(Command.PULL_REQ, new PullReqMessageHandler());
         dispatcher.register(Command.SEND_BACK, new SendBackMessageHandler());
         return dispatcher;
     }

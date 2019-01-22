@@ -62,7 +62,7 @@ public class PullRequestHoldService {
         while(iterator.hasNext()){
             Map.Entry<String, PullRequest> next = iterator.next();
             PullRequest request = next.getValue();
-            List<Packet> result = PullCenter.I.pull(request, false);
+            Packet result = PullCenter.I.pull(request, false);
             boolean execute = executeWhenWakeup(next.getValue(), result);
             if(execute){
                 iterator.remove();
@@ -74,14 +74,11 @@ public class PullRequestHoldService {
         checkRequestHolder();
     }
 
-    private boolean executeWhenWakeup(PullRequest request, List<Packet> result){
+    private boolean executeWhenWakeup(PullRequest request, Packet result){
         boolean execute = false;
         try {
-            if(!CollectionUtils.isEmpty(result)){
-                for(Packet packet : result){
-                    packet.setOpaque(request.getPacket().getOpaque());
-                    request.getConnection().send(packet);
-                }
+            if(result != null){
+                request.getConnection().send(result);
                 execute = true;
             } else if(System.currentTimeMillis() > (request.getSuspendTimestamp() + request.getTimeoutMs())){
                 request.getConnection().send(Packets.noNewMsg(request.getPacket().getOpaque()));
