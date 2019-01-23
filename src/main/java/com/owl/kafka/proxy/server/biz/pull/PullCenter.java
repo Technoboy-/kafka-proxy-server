@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -26,9 +27,9 @@ public class PullCenter{
 
     private final int queueSize = ServerConfigs.I.getServerQueueSize();
 
-    private final LinkedBlockingQueue<Packet> retryQueue = new LinkedBlockingQueue<>(queueSize);
+    private final ArrayBlockingQueue<Packet> retryQueue = new ArrayBlockingQueue<>(queueSize);
 
-    private final LinkedBlockingQueue<ConsumerRecord<byte[], byte[]>> pullQueue = new LinkedBlockingQueue<>(queueSize);
+    private final ArrayBlockingQueue<ConsumerRecord<byte[], byte[]>> pullQueue = new ArrayBlockingQueue<>(queueSize);
 
     private final int pullMessageCount = ServerConfigs.I.getServerPullMessageCount();
 

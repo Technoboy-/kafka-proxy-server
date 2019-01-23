@@ -18,7 +18,7 @@ public class AcknowledgeMessageListenerPushService<K, V> extends RebalanceMessag
     @Override
     public void onMessage(ConsumerRecord<byte[], byte[]> record) {
         try {
-            pushCenter.getPushQueue().put(record);
+            pushCenter.putMessage(record);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

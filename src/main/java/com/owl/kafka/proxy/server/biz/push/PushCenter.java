@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,9 +39,9 @@ public class PushCenter implements Runnable{
 
     private final RetryPolicy retryPolicy = new DefaultRetryPolicy();
 
-    private final LinkedBlockingQueue<Packet> retryQueue = new LinkedBlockingQueue<>(queueSize);
+    private final ArrayBlockingQueue<Packet> retryQueue = new ArrayBlockingQueue<>(queueSize);
 
-    private final LinkedBlockingQueue<ConsumerRecord<byte[], byte[]>> pushQueue = new LinkedBlockingQueue<>(queueSize);
+    private final ArrayBlockingQueue<ConsumerRecord<byte[], byte[]>> pushQueue = new ArrayBlockingQueue<>(queueSize);
 
     private final RepushPolicy repushPolicy = new DefaultFixedTimeRepushPolicy(this);
 
@@ -59,6 +60,10 @@ public class PushCenter implements Runnable{
         this.start.compareAndSet(false, true);
         this.worker.start();
         this.repushPolicy.start();
+    }
+
+    public void putMessage(ConsumerRecord<byte[], byte[]> record) throws InterruptedException{
+        this.pushQueue.put(record);
     }
 
     public void push(Packet packet) throws InterruptedException, ChannelInactiveException {
@@ -156,10 +161,6 @@ public class PushCenter implements Runnable{
             packet.setBody(buffer.array());
         }
         return packet;
-    }
-
-    public LinkedBlockingQueue<ConsumerRecord<byte[], byte[]>> getPushQueue() {
-        return pushQueue;
     }
 
     private void checkState(){
