@@ -51,8 +51,8 @@ public class PullServer {
 
     public void close(){
         this.consumer.close();
-        this.registryCenter.close();
         this.nettyServer.close();
         this.dlqService.close();
+        this.registryCenter.close();
     }
 }
