@@ -5,6 +5,7 @@ import com.owl.kafka.client.service.IdService;
 import com.owl.kafka.client.service.LoadBalance;
 import com.owl.kafka.client.service.RetryPolicy;
 import com.owl.kafka.client.transport.Connection;
+import com.owl.kafka.client.transport.message.Message;
 import com.owl.kafka.push.server.biz.bo.ControlResult;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.registry.RegistryCenter;
@@ -20,6 +21,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -138,12 +140,21 @@ public class PushCenter implements Runnable{
             //
             packet.setCmd(Command.PUSH.getCmd());
             packet.setOpaque(IdService.I.getId());
+
             Header header = new Header(record.topic(), record.partition(), record.offset(), IdService.I.getId());
-            //TODO
-//            packet.setHeader(SerializerImpl.getFastJsonSerializer().serialize(header));
-//            packet.setKey(record.key());
-//            packet.setValue(record.value());
+            byte[] headerInBytes = SerializerImpl.getFastJsonSerializer().serialize(header);
             //
+            ByteBuffer buffer = ByteBuffer.allocate(4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length);
+            buffer.putInt(headerInBytes.length);
+            buffer.put(headerInBytes);
+            //
+            buffer.putInt(record.key().length);
+            buffer.put(record.key());
+            //
+            buffer.putInt(record.value().length);
+            buffer.put(record.value());
+            //
+            packet.setBody(buffer.array());
         }
         return packet;
     }

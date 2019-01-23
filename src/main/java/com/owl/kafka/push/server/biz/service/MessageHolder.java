@@ -1,12 +1,17 @@
 package com.owl.kafka.push.server.biz.service;
 
+import com.owl.kafka.client.transport.message.Message;
 import com.owl.kafka.client.transport.protocol.Packet;
+import com.owl.kafka.client.util.MessageCodec;
 import com.owl.kafka.push.server.biz.bo.FastResendMessage;
 import com.owl.kafka.push.server.biz.bo.ResendPacket;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @Author: Tboy
@@ -31,27 +36,41 @@ public class MessageHolder {
         return COUNT.get();
     }
 
+    private static final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
     public static void fastPut(Packet packet){
-        //TODO
-//        if(packet == null){
-//            return;
-//        }
-//        MSG_QUEUE.put(new ResendPacket(packet.getHeaderRef().getMsgId()));
-//        long size = packet.getHeader().length + packet.getKey().length + packet.getValue().length;
-//        MSG_MAPPER.put(packet.getHeaderRef().getMsgId(), new FastResendMessage(packet.getHeaderRef().getMsgId(), packet.getHeader(), size));
-//        COUNT.incrementAndGet();
-//        MEMORY_SIZE.addAndGet(size);
+        if(packet == null){
+            return;
+        }
+        final Lock writeLock = readWriteLock.writeLock();
+        try {
+            writeLock.lock();
+            Message message = MessageCodec.decode(packet.getBody());
+            MSG_QUEUE.put(new ResendPacket(message.getHeader().getMsgId()));
+            long size = message.getHeaderInBytes().length + message.getKey().length + message.getValue().length;
+            MSG_MAPPER.put(message.getHeader().getMsgId(), new FastResendMessage(message.getHeader().getMsgId(), message.getHeaderInBytes(), size));
+            COUNT.incrementAndGet();
+            MEMORY_SIZE.addAndGet(size);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
-    public static Packet fastRemove(Packet packet){
-        //todo
-//        MSG_QUEUE.remove(new ResendPacket(packet.getHeaderRef().getMsgId()));
-//        FastResendMessage frm = MSG_MAPPER.remove(packet.getHeaderRef().getMsgId());
-//        if(frm != null){
-//            packet.setHeader(frm.getHeader());
-//            COUNT.decrementAndGet();
-//            MEMORY_SIZE.addAndGet(frm.getSize()*(-1));
-//        }
-        return packet;
+    public static Message fastRemove(Packet packet){
+        Message message = null;
+        final Lock writeLock = readWriteLock.writeLock();
+        try {
+            writeLock.lock();
+            message = MessageCodec.decode(packet.getBody());
+            MSG_QUEUE.remove(new ResendPacket(message.getHeader().getMsgId()));
+            FastResendMessage frm = MSG_MAPPER.remove(message.getHeader().getMsgId());
+            if(frm != null){
+                COUNT.decrementAndGet();
+                MEMORY_SIZE.addAndGet(frm.getSize()*(-1));
+            }
+            return message;
+        } finally {
+            writeLock.unlock();
+        }
     }
 }

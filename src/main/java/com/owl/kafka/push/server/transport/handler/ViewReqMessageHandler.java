@@ -2,8 +2,10 @@ package com.owl.kafka.push.server.transport.handler;
 
 import com.owl.kafka.client.transport.Connection;
 import com.owl.kafka.client.transport.handler.CommonMessageHandler;
+import com.owl.kafka.client.transport.message.Message;
 import com.owl.kafka.client.transport.protocol.Header;
 import com.owl.kafka.client.transport.protocol.Packet;
+import com.owl.kafka.client.util.MessageCodec;
 import com.owl.kafka.client.util.Packets;
 import com.owl.kafka.consumer.Record;
 import com.owl.kafka.push.server.biz.service.InstanceHolder;
@@ -21,12 +23,12 @@ public class ViewReqMessageHandler extends CommonMessageHandler {
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
         LOGGER.debug("received view message : {}", packet);
-        //todo
-//        Header header = (Header) SerializerImpl.getFastJsonSerializer().deserialize(packet.getHeader(), Header.class);
-//        Record<byte[], byte[]> record = InstanceHolder.I.getDLQService().view(header.getMsgId());
-//        if(record != null){
-//            connection.send(Packets.toViewPacket(header.getMsgId(), record));
-//        }
+        Message message = MessageCodec.decode(packet.getBody());
+        Header header = message.getHeader();
+        Record<byte[], byte[]> record = InstanceHolder.I.getDLQService().view(header.getMsgId());
+        if(record != null){
+            connection.send(Packets.toViewPacket(header.getMsgId(), record));
+        }
     }
 
 
