@@ -9,7 +9,6 @@ import com.owl.kafka.client.util.MessageCodec;
 import com.owl.kafka.client.util.Packets;
 import com.owl.kafka.consumer.Record;
 import com.owl.kafka.push.server.biz.service.InstanceHolder;
-import com.owl.kafka.serializer.SerializerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +26,9 @@ public class ViewReqMessageHandler extends CommonMessageHandler {
         Header header = message.getHeader();
         Record<byte[], byte[]> record = InstanceHolder.I.getDLQService().view(header.getMsgId());
         if(record != null){
-            connection.send(Packets.toViewPacket(header.getMsgId(), record));
+            connection.send(Packets.viewResp(packet.getOpaque(), header.getMsgId(), record));
+        } else{
+            connection.send(Packets.noViewMsgResp(packet.getOpaque()));
         }
     }
 

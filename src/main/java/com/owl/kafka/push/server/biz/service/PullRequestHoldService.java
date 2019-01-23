@@ -79,7 +79,7 @@ public class PullRequestHoldService {
                 request.getConnection().send(result);
                 execute = true;
             } else if(System.currentTimeMillis() > (request.getSuspendTimestamp() + request.getTimeoutMs())){
-                request.getConnection().send(Packets.noNewMsg(request.getPacket().getOpaque()));
+                request.getConnection().send(Packets.noNewMsgResp(request.getPacket().getOpaque()));
                 execute = true;
             }
         } catch (ChannelInactiveException e) {
