@@ -11,7 +11,6 @@ import com.owl.kafka.client.proxy.transport.protocol.Command;
 import com.owl.kafka.client.proxy.transport.protocol.Packet;
 import com.owl.kafka.client.serializer.SerializerImpl;
 import com.owl.kafka.proxy.server.biz.bo.ControlResult;
-
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.biz.service.*;
 import io.netty.channel.ChannelFuture;
@@ -22,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
