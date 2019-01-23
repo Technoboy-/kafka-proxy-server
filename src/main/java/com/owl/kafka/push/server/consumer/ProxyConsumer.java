@@ -1,6 +1,6 @@
 package com.owl.kafka.push.server.consumer;
 
-import com.owl.kafka.client.zookeeper.KafkaZookeeperConfig;
+import com.owl.kafka.proxy.zookeeper.KafkaZookeeperConfig;
 import com.owl.kafka.util.CollectionUtils;
 import com.owl.kafka.util.Preconditions;
 import com.owl.kafka.util.StringUtils;

@@ -1,6 +1,6 @@
 package com.owl.kafka.push.server.biz.service;
 
-import com.owl.kafka.client.transport.exceptions.ChannelInactiveException;
+import com.owl.kafka.proxy.transport.exceptions.ChannelInactiveException;
 
 /**
  * @Author: Tboy

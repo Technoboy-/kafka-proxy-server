@@ -1,13 +1,12 @@
 package com.owl.kafka.push.server.biz.push;
 
-import com.owl.kafka.client.zookeeper.KafkaZookeeperConfig;
+import com.owl.kafka.proxy.zookeeper.KafkaZookeeperConfig;
 import com.owl.kafka.consumer.ConsumerConfig;
 import com.owl.kafka.consumer.service.MessageListenerService;
 import com.owl.kafka.push.server.biz.NettyServer;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.registry.RegistryCenter;
 import com.owl.kafka.push.server.biz.service.DLQService;
-import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import com.owl.kafka.push.server.consumer.AcknowledgeMessageListenerPushService;
 import com.owl.kafka.push.server.consumer.ProxyConsumer;
 import com.owl.kafka.util.StringUtils;

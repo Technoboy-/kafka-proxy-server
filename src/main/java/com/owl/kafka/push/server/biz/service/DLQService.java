@@ -1,8 +1,8 @@
 package com.owl.kafka.push.server.biz.service;
 
-import com.owl.kafka.client.transport.message.Message;
-import com.owl.kafka.client.transport.protocol.Packet;
-import com.owl.kafka.client.util.MessageCodec;
+import com.owl.kafka.proxy.transport.message.Message;
+import com.owl.kafka.proxy.transport.protocol.Packet;
+import com.owl.kafka.proxy.util.MessageCodec;
 import com.owl.kafka.consumer.Record;
 import com.owl.kafka.push.server.biz.bo.ResendPacket;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;

@@ -1,9 +1,8 @@
 package com.owl.kafka.push.server.transport.handler;
-import com.owl.kafka.client.transport.Connection;
-import com.owl.kafka.client.transport.NettyConnection;
-import com.owl.kafka.client.transport.handler.MessageDispatcher;
-import com.owl.kafka.client.transport.protocol.Packet;
-import com.owl.kafka.push.server.biz.registry.RegistryCenter;
+import com.owl.kafka.proxy.transport.Connection;
+import com.owl.kafka.proxy.transport.NettyConnection;
+import com.owl.kafka.proxy.transport.handler.MessageDispatcher;
+import com.owl.kafka.proxy.transport.protocol.Packet;
 import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;

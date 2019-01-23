@@ -1,20 +1,15 @@
 package com.owl.kafka.push.server.biz.bo;
 
+import com.owl.kafka.proxy.ConfigLoader;
 import com.owl.kafka.util.Constants;
 import com.owl.kafka.util.Preconditions;
 import com.owl.kafka.util.StringUtils;
-import com.owl.kafka.client.ConfigLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @Author: Tboy
  */
 public class ServerConfigs extends ConfigLoader {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerConfigs.class);
-
-    // server configs
     static final String SERVER_PORT = "server.port";
 
     static final String SERVER_BOSS_NUM = "server.boss.num";
@@ -37,11 +32,17 @@ public class ServerConfigs extends ConfigLoader {
 
     static final String SERVER_MESSAGE_REPOST_INTERVAL = "server.message.repost.interval";
 
-    static final String SERVER_FLOW_CONTROL_MESSAGE_COUNT = "server.flow.control.message.count";
+    static final String SERVER_PUSH_FLOW_CONTROL_MESSAGE_COUNT = "server.push.flow.control.message.count";
 
-    static final String SERVER_FLOW_CONTROL_MESSAGE_SIZE = "server.flow.control.message.size";
+    static final String SERVER_PUSH_FLOW_CONTROL_MESSAGE_SIZE = "server.push.flow.control.message.size";
 
-    static final  String SERVER_CONFIG_FILE = "push_server.properties";
+    static final String SERVER_PULL_MESSAGE_COUNT = "server.pull.message.count";
+
+    static final String SERVER_PULL_MESSAGE_SIZE = "server.pull.message.size";
+
+    static final String SERVER_REPOST_COUNT = "server.repost.count";
+
+    static final  String SERVER_CONFIG_FILE = "proxy_server.properties";
 
     public static ServerConfigs I = new ServerConfigs(SERVER_CONFIG_FILE);
 
@@ -100,10 +101,22 @@ public class ServerConfigs extends ConfigLoader {
     }
 
     public int getServerFlowControlMessageCount() {
-        return getInt(SERVER_FLOW_CONTROL_MESSAGE_COUNT, 10000);
+        return getInt(SERVER_PUSH_FLOW_CONTROL_MESSAGE_COUNT, 10000);
     }
 
     public int getServerFlowControlMessageSize() {
-        return getInt(SERVER_FLOW_CONTROL_MESSAGE_SIZE, 64);
+        return getInt(SERVER_PUSH_FLOW_CONTROL_MESSAGE_SIZE, 64);
+    }
+
+    public int getServerPullMessageCount(){
+        return getInt(SERVER_PULL_MESSAGE_COUNT, 10);
+    }
+
+    public long getServerPullMessageSize(){
+        return getLong(SERVER_PULL_MESSAGE_SIZE, 1024 * 1024 * 8);
+    }
+
+    public int getServerRepostCount(){
+        return getInt(SERVER_REPOST_COUNT, 10);
     }
 }

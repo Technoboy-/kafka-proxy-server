@@ -1,7 +1,7 @@
 package com.owl.kafka.push.server.biz.bo;
 
-import com.owl.kafka.client.transport.Connection;
-import com.owl.kafka.client.transport.protocol.Packet;
+import com.owl.kafka.proxy.transport.Connection;
+import com.owl.kafka.proxy.transport.protocol.Packet;
 
 import java.util.Objects;
 

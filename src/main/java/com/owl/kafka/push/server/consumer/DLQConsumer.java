@@ -1,10 +1,9 @@
 package com.owl.kafka.push.server.consumer;
 
-import com.owl.kafka.client.service.RegisterMetadata;
-import com.owl.kafka.client.transport.Address;
-import com.owl.kafka.client.zookeeper.ZookeeperClient;
+import com.owl.kafka.proxy.service.RegisterMetadata;
+import com.owl.kafka.proxy.transport.Address;
+import com.owl.kafka.proxy.zookeeper.ZookeeperClient;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
-import com.owl.kafka.push.server.biz.registry.RegistryCenter;
 import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import com.owl.kafka.push.server.biz.service.LeaderElectionService;
 import com.owl.kafka.util.NetUtils;

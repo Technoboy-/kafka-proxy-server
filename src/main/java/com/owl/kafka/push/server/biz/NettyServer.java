@@ -1,13 +1,13 @@
 package com.owl.kafka.push.server.biz;
 
-import com.owl.kafka.client.transport.codec.PacketDecoder;
-import com.owl.kafka.client.transport.codec.PacketEncoder;
-import com.owl.kafka.client.transport.handler.MessageDispatcher;
+import com.owl.kafka.proxy.transport.codec.PacketDecoder;
+import com.owl.kafka.proxy.transport.codec.PacketEncoder;
+import com.owl.kafka.proxy.transport.handler.MessageDispatcher;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import com.owl.kafka.push.server.transport.NettyTcpServer;
 import com.owl.kafka.push.server.transport.handler.*;
-import com.owl.kafka.client.transport.protocol.Command;
+import com.owl.kafka.proxy.transport.protocol.Command;
 import com.owl.kafka.push.server.consumer.ProxyConsumer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandler;

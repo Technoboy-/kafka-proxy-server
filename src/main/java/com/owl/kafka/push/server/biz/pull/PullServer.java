@@ -1,6 +1,6 @@
 package com.owl.kafka.push.server.biz.pull;
 
-import com.owl.kafka.client.zookeeper.KafkaZookeeperConfig;
+import com.owl.kafka.proxy.zookeeper.KafkaZookeeperConfig;
 import com.owl.kafka.consumer.ConsumerConfig;
 import com.owl.kafka.consumer.service.MessageListenerService;
 import com.owl.kafka.push.server.biz.NettyServer;

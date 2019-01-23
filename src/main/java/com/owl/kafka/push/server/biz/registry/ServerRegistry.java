@@ -1,15 +1,10 @@
 package com.owl.kafka.push.server.biz.registry;
 
-import com.owl.kafka.client.service.RegisterMetadata;
-import com.owl.kafka.client.service.RegistryService;
-import com.owl.kafka.client.transport.Address;
-import com.owl.kafka.util.NamedThreadFactory;
+import com.owl.kafka.proxy.service.RegisterMetadata;
+import com.owl.kafka.proxy.service.RegistryService;
+import com.owl.kafka.proxy.transport.Address;
 import com.owl.kafka.util.NetUtils;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
-
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: Tboy

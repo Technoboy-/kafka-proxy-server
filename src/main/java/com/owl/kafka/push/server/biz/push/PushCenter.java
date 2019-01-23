@@ -1,14 +1,14 @@
 package com.owl.kafka.push.server.biz.push;
 
-import com.owl.kafka.client.service.DefaultRetryPolicy;
-import com.owl.kafka.client.service.IdService;
-import com.owl.kafka.client.service.LoadBalance;
-import com.owl.kafka.client.service.RetryPolicy;
-import com.owl.kafka.client.transport.Connection;
-import com.owl.kafka.client.transport.exceptions.ChannelInactiveException;
-import com.owl.kafka.client.transport.protocol.Command;
-import com.owl.kafka.client.transport.message.Header;
-import com.owl.kafka.client.transport.protocol.Packet;
+import com.owl.kafka.proxy.service.DefaultRetryPolicy;
+import com.owl.kafka.proxy.service.IdService;
+import com.owl.kafka.proxy.service.LoadBalance;
+import com.owl.kafka.proxy.service.RetryPolicy;
+import com.owl.kafka.proxy.transport.Connection;
+import com.owl.kafka.proxy.transport.exceptions.ChannelInactiveException;
+import com.owl.kafka.proxy.transport.protocol.Command;
+import com.owl.kafka.proxy.transport.message.Header;
+import com.owl.kafka.proxy.transport.protocol.Packet;
 import com.owl.kafka.push.server.biz.bo.ControlResult;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.service.*;

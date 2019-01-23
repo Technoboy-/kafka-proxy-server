@@ -1,15 +1,14 @@
 package com.owl.kafka.push.server.biz.service;
 
-import com.owl.kafka.client.transport.message.Message;
-import com.owl.kafka.client.transport.protocol.Packet;
-import com.owl.kafka.client.util.MessageCodec;
+import com.owl.kafka.proxy.transport.message.Message;
+import com.owl.kafka.proxy.transport.protocol.Packet;
+import com.owl.kafka.proxy.util.MessageCodec;
 import com.owl.kafka.push.server.biz.bo.FastResendMessage;
 import com.owl.kafka.push.server.biz.bo.ResendPacket;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -36,15 +35,14 @@ public class MessageHolder {
         return COUNT.get();
     }
 
-    private static final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public static void fastPut(Packet packet){
         if(packet == null){
             return;
         }
-        final Lock writeLock = readWriteLock.writeLock();
+        lock.writeLock().lock();
         try {
-            writeLock.lock();
             Message message = MessageCodec.decode(packet.getBody());
             MSG_QUEUE.put(new ResendPacket(message.getHeader().getMsgId()));
             long size = message.getHeaderInBytes().length + message.getKey().length + message.getValue().length;
@@ -52,15 +50,14 @@ public class MessageHolder {
             COUNT.incrementAndGet();
             MEMORY_SIZE.addAndGet(size);
         } finally {
-            writeLock.unlock();
+            lock.writeLock().unlock();
         }
     }
 
     public static Message fastRemove(Packet packet){
         Message message = null;
-        final Lock writeLock = readWriteLock.writeLock();
+        lock.writeLock().lock();
         try {
-            writeLock.lock();
             message = MessageCodec.decode(packet.getBody());
             MSG_QUEUE.remove(new ResendPacket(message.getHeader().getMsgId()));
             FastResendMessage frm = MSG_MAPPER.remove(message.getHeader().getMsgId());
@@ -70,7 +67,7 @@ public class MessageHolder {
             }
             return message;
         } finally {
-            writeLock.unlock();
+            lock.writeLock().unlock();
         }
     }
 }

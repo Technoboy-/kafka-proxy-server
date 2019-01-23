@@ -1,6 +1,6 @@
 package com.owl.kafka.push.server.biz.service;
 
-import com.owl.kafka.client.zookeeper.ZookeeperClient;
+import com.owl.kafka.proxy.zookeeper.ZookeeperClient;
 import com.owl.kafka.push.server.biz.registry.RegistryCenter;
 
 /**

@@ -1,9 +1,9 @@
 package com.owl.kafka.push.server.biz.pull;
 
-import com.owl.kafka.client.service.IdService;
-import com.owl.kafka.client.transport.protocol.Command;
-import com.owl.kafka.client.transport.message.Header;
-import com.owl.kafka.client.transport.protocol.Packet;
+import com.owl.kafka.proxy.service.IdService;
+import com.owl.kafka.proxy.transport.protocol.Command;
+import com.owl.kafka.proxy.transport.message.Header;
+import com.owl.kafka.proxy.transport.protocol.Packet;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.service.PullRequestHoldService;
 import com.owl.kafka.push.server.biz.bo.PullRequest;
@@ -30,13 +30,14 @@ public class PullCenter{
 
     private final LinkedBlockingQueue<ConsumerRecord<byte[], byte[]>> pullQueue = new LinkedBlockingQueue<>(queueSize);
 
-    private final int singleMessageSize = 1024 * 1024 * 8;
+    private final int pullMessageCount = ServerConfigs.I.getServerPullMessageCount();
+
+    private final long messageSize = ServerConfigs.I.getServerPullMessageSize();
 
     private final PullRequestHoldService pullRequestHoldService = new PullRequestHoldService();
 
     public void putMessage(ConsumerRecord<byte[], byte[]> record) throws InterruptedException{
         this.pullQueue.put(record);
-        //TODO消息满了情况、
         this.pullRequestHoldService.notifyMessageArriving();
     }
 
@@ -45,23 +46,23 @@ public class PullCenter{
     }
 
     public Packet pull(PullRequest request, boolean isSuspend) {
-        int messageCount = 2;
-        long messageSize = singleMessageSize * messageCount;
+        long messageCount = pullMessageCount;
         final Packet result = request.getPacket();
         result.setCmd(Command.PULL_RESP.getCmd());
-        while(messageCount > 0 && result.getBody().length < messageSize){
+        while(messageCount > 0 && result.getBodyLength() < messageSize * messageCount){
             messageCount--;
-            this.poll(result);
+            if(!this.poll(result)){
+                break;
+            }
         }
         if(result.isBodyEmtpy() && isSuspend){
             pullRequestHoldService.suspend(request);
-            return result;
-        } else{
-            return result;
         }
+        return result;
     }
 
-    private Packet poll(Packet packet) {
+    private boolean poll(Packet packet) {
+        boolean polled = false;
         Packet one = retryQueue.peek();
         if(one != null){
             retryQueue.poll();
@@ -69,6 +70,7 @@ public class PullCenter{
             buffer.put(packet.getBody());
             buffer.put(one.getBody());
             packet.setBody(buffer.array());
+            polled = true;
         } else{
             ConsumerRecord<byte[], byte[]> record = pullQueue.poll();
             if(record != null){
@@ -90,9 +92,10 @@ public class PullCenter{
                 buffer.put(record.value());
 
                 packet.setBody(buffer.array());
+                polled = true;
             }
         }
-        return packet;
+        return polled;
     }
 
     public void close(){

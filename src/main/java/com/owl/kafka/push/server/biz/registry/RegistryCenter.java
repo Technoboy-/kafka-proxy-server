@@ -1,7 +1,7 @@
 package com.owl.kafka.push.server.biz.registry;
 
-import com.owl.kafka.client.service.RegistryService;
-import com.owl.kafka.client.zookeeper.ZookeeperClient;
+import com.owl.kafka.proxy.service.RegistryService;
+import com.owl.kafka.proxy.zookeeper.ZookeeperClient;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.service.InstanceHolder;
 

@@ -1,9 +1,9 @@
 package com.owl.kafka.push.server.transport.handler;
 
-import com.owl.kafka.client.transport.Connection;
-import com.owl.kafka.client.transport.exceptions.ChannelInactiveException;
-import com.owl.kafka.client.transport.handler.CommonMessageHandler;
-import com.owl.kafka.client.transport.protocol.Packet;
+import com.owl.kafka.proxy.transport.Connection;
+import com.owl.kafka.proxy.transport.exceptions.ChannelInactiveException;
+import com.owl.kafka.proxy.transport.handler.CommonMessageHandler;
+import com.owl.kafka.proxy.transport.protocol.Packet;
 import com.owl.kafka.push.server.biz.bo.PullRequest;
 import com.owl.kafka.push.server.biz.pull.PullCenter;
 import com.owl.kafka.util.NetUtils;

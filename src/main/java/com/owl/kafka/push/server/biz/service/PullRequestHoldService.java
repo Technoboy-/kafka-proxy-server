@@ -1,8 +1,8 @@
 package com.owl.kafka.push.server.biz.service;
 
-import com.owl.kafka.client.transport.exceptions.ChannelInactiveException;
-import com.owl.kafka.client.transport.protocol.Packet;
-import com.owl.kafka.client.util.Packets;
+import com.owl.kafka.proxy.transport.exceptions.ChannelInactiveException;
+import com.owl.kafka.proxy.transport.protocol.Packet;
+import com.owl.kafka.proxy.util.Packets;
 import com.owl.kafka.push.server.biz.bo.PullRequest;
 import com.owl.kafka.push.server.biz.pull.PullCenter;
 import org.slf4j.Logger;
@@ -79,7 +79,7 @@ public class PullRequestHoldService {
                 request.getConnection().send(result);
                 execute = true;
             } else if(System.currentTimeMillis() > (request.getSuspendTimestamp() + request.getTimeoutMs())){
-                request.getConnection().send(Packets.noNewMsgResp(request.getPacket().getOpaque()));
+                request.getConnection().send(Packets.pullNoMsgResp(request.getPacket().getOpaque()));
                 execute = true;
             }
         } catch (ChannelInactiveException e) {
