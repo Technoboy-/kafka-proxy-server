@@ -29,17 +29,23 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
         NettyConnection.attachChannel(ctx.channel());
     }
 
+    @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Connection connnection = NettyConnection.attachChannel(ctx.channel());
         InstanceHolder.I.getRegistryCenter().getClientRegistry().unregister(connnection);
         connnection.close();
     }
 
+    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         dispatcher.dispatch(NettyConnection.attachChannel(ctx.channel()), (Packet)msg);
     }
 
+    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         LOGGER.error("exceptionCaught", cause);
+        ctx.close();
     }
+
+
 }
