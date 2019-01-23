@@ -10,8 +10,6 @@ import com.owl.kafka.push.server.biz.service.InstanceHolder;
  */
 public class RegistryCenter {
 
-    public static RegistryCenter I = new RegistryCenter();
-
     private final ServerRegistry serverRegistry;
 
     private final ClientRegistry clientRegistry;
@@ -20,7 +18,7 @@ public class RegistryCenter {
 
     private final RegistryService registryService;
 
-    private RegistryCenter(){
+    public RegistryCenter(){
         this.zookeeperClient = new ZookeeperClient(ServerConfigs.I.getZookeeperServerList(), ZookeeperClient.PUSH_SERVER_NAMESPACE, ServerConfigs.I.getZookeeperSessionTimeoutMs(), ServerConfigs.I.getZookeeperConnectionTimeoutMs());
         this.registryService = new RegistryService(this.zookeeperClient);
         //
@@ -29,6 +27,7 @@ public class RegistryCenter {
 
         //
         InstanceHolder.I.setZookeeperClient(this.zookeeperClient);
+        InstanceHolder.I.setRegistryCenter(this);
     }
 
     public ServerRegistry getServerRegistry() {

@@ -27,13 +27,15 @@ public class PushServer {
 
     private final PushCenter pushCenter;
 
+    private final RegistryCenter registryCenter;
+
     public PushServer(){
         String kafkaServerList = ServerConfigs.I.getServerKafkaServerList();
         if(StringUtils.isBlank(kafkaServerList)){
             kafkaServerList = KafkaZookeeperConfig.getBrokerIds(ServerConfigs.I.getZookeeperServerList(), ServerConfigs.I.getZookeeperNamespace());
         }
-        //TODO
-        final RegistryCenter registryCenter = RegistryCenter.I;
+        this.registryCenter = new RegistryCenter();
+        //
         ConsumerConfig consumerConfigs = new ConsumerConfig(kafkaServerList, ServerConfigs.I.getServerTopic(), ServerConfigs.I.getServerGroupId());
         consumerConfigs.setAutoCommit(false);
         this.consumer = new ProxyConsumer(consumerConfigs);
@@ -45,8 +47,6 @@ public class PushServer {
         this.consumer.setMessageListenerService(messageListenerService);
 
         this.dlqService = new DLQService(kafkaServerList, ServerConfigs.I.getServerTopic(), ServerConfigs.I.getServerGroupId());
-
-        InstanceHolder.I.setDLQService(this.dlqService);
     }
 
     public void start(){
@@ -57,7 +57,7 @@ public class PushServer {
 
     public void close(){
         this.consumer.close();
-        RegistryCenter.I.close();
+        this.registryCenter.close();
         this.nettyServer.close();
         this.dlqService.close();
     }

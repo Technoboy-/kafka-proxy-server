@@ -83,9 +83,9 @@ public class PushCenter implements Runnable{
             controlResult = flowController.flowControl(packet);
         }
         retryPolicy.reset();
-        Connection connection = loadBalance.select(RegistryCenter.I.getClientRegistry().getClients());
+        Connection connection = loadBalance.select(InstanceHolder.I.getRegistryCenter().getClientRegistry().getClients());
         while((connection == null && retryPolicy.allowRetry()) || (!connection.isWritable() && !connection.isActive())){
-            connection = loadBalance.select(RegistryCenter.I.getClientRegistry().getClients());
+            connection = loadBalance.select(InstanceHolder.I.getRegistryCenter().getClientRegistry().getClients());
         }
 
         //

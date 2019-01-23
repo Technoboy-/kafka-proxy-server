@@ -48,6 +48,7 @@ public class DLQService {
         this.producer = new org.apache.kafka.clients.producer.KafkaProducer(producerConfigs);
 
         this.dlqConsumer = new DLQConsumer(bootstrapServers, this.topic, groupId);
+        InstanceHolder.I.setDLQService(this);
     }
 
     public void close(){

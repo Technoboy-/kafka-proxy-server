@@ -31,7 +31,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Connection connnection = NettyConnection.attachChannel(ctx.channel());
-        RegistryCenter.I.getClientRegistry().unregister(connnection);
+        InstanceHolder.I.getRegistryCenter().getClientRegistry().unregister(connnection);
         connnection.close();
     }
 

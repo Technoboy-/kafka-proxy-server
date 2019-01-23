@@ -1,6 +1,7 @@
 package com.owl.kafka.push.server.biz.service;
 
 import com.owl.kafka.client.zookeeper.ZookeeperClient;
+import com.owl.kafka.push.server.biz.registry.RegistryCenter;
 
 /**
  * @Author: Tboy
@@ -12,6 +13,16 @@ public class InstanceHolder {
     private DLQService dlqService;
 
     private ZookeeperClient zookeeperClient;
+
+    private RegistryCenter registryCenter;
+
+    public RegistryCenter getRegistryCenter() {
+        return registryCenter;
+    }
+
+    public void setRegistryCenter(RegistryCenter registryCenter) {
+        this.registryCenter = registryCenter;
+    }
 
     public void setDLQService(DLQService service){
         this.dlqService = service;

@@ -64,7 +64,7 @@ public class DLQConsumer implements LeaderLatchListener, Runnable {
         Address address = new Address(NetUtils.getLocalIp(), ServerConfigs.I.getServerPort());
         metadata.setPath(String.format(ServerConfigs.I.ZOOKEEPER_CONSUMERS, this.topic));
         metadata.setAddress(address);
-        RegistryCenter.I.getServerRegistry().register(metadata);
+        InstanceHolder.I.getRegistryCenter().getServerRegistry().register(metadata);
         //
         Map<String, Object> consumerConfigs = new HashMap<>();
         consumerConfigs.put("bootstrap.servers", bootstrapServers);
@@ -104,7 +104,7 @@ public class DLQConsumer implements LeaderLatchListener, Runnable {
         Address address = new Address(NetUtils.getLocalIp(), ServerConfigs.I.getServerPort());
         metadata.setPath(String.format(ServerConfigs.I.ZOOKEEPER_CONSUMERS, this.topic));
         metadata.setAddress(address);
-        RegistryCenter.I.getServerRegistry().unregister(metadata);
+        InstanceHolder.I.getRegistryCenter().getServerRegistry().unregister(metadata);
         //
         if(this.consumer != null){
             this.consumer.close();
