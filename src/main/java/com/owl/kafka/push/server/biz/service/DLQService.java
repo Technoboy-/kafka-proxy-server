@@ -1,6 +1,8 @@
 package com.owl.kafka.push.server.biz.service;
 
+import com.owl.kafka.client.transport.message.Message;
 import com.owl.kafka.client.transport.protocol.Packet;
+import com.owl.kafka.client.util.MessageCodec;
 import com.owl.kafka.consumer.Record;
 import com.owl.kafka.push.server.biz.bo.ResendPacket;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
@@ -46,6 +48,7 @@ public class DLQService {
         this.producer = new org.apache.kafka.clients.producer.KafkaProducer(producerConfigs);
 
         this.dlqConsumer = new DLQConsumer(bootstrapServers, this.topic, groupId);
+        InstanceHolder.I.setDLQService(this);
     }
 
     public void close(){
@@ -74,8 +77,9 @@ public class DLQService {
         Preconditions.checkArgument(resendPacket.getRepost() >= ServerConfigs.I.getServerMessageRepostTimes(), "resendPacket must repost more than " + ServerConfigs.I.getServerMessageRepostTimes() + " times");
         try {
             Packet packet = resendPacket.getPacket();
+            Message message = MessageCodec.decode(packet.getBody());
             String dlp = String.format(this.topic + DLQ_DATA_PATH, resendPacket.getMsgId());
-            ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(this.topic, 0, packet.getKey(), packet.getValue());
+            ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(this.topic, 0, message.getKey(), message.getValue());
             this.producer.send(record, new Callback() {
 
                 @Override
@@ -99,7 +103,8 @@ public class DLQService {
     public void write(long msgId, Packet packet){
         try {
             String dlp = String.format(this.topic + DLQ_DATA_PATH, msgId);
-            ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(this.topic, 0, packet.getKey(), packet.getValue());
+            Message message = MessageCodec.decode(packet.getBody());
+            ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(this.topic, 0, message.getKey(), message.getValue());
             this.producer.send(record, new Callback() {
 
                 @Override

@@ -2,19 +2,17 @@ package com.owl.kafka.push.server.biz.pull;
 
 import com.owl.kafka.client.service.IdService;
 import com.owl.kafka.client.transport.protocol.Command;
-import com.owl.kafka.client.transport.protocol.Header;
+import com.owl.kafka.client.transport.message.Header;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.service.PullRequestHoldService;
 import com.owl.kafka.push.server.biz.bo.PullRequest;
 import com.owl.kafka.serializer.SerializerImpl;
-import com.owl.kafka.util.CollectionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -38,6 +36,7 @@ public class PullCenter{
 
     public void putMessage(ConsumerRecord<byte[], byte[]> record) throws InterruptedException{
         this.pullQueue.put(record);
+        //TODO消息满了情况、
         this.pullRequestHoldService.notifyMessageArriving();
     }
 
@@ -45,55 +44,55 @@ public class PullCenter{
         this.retryQueue.put(packet);
     }
 
-    public List<Packet> pull(PullRequest request, boolean isSuspend) {
-        int messageCount = 1;
-        List<Packet> result = this.pull(messageCount, singleMessageSize * messageCount);
-        if(CollectionUtils.isEmpty(result) && isSuspend){
+    public Packet pull(PullRequest request, boolean isSuspend) {
+        int messageCount = 2;
+        long messageSize = singleMessageSize * messageCount;
+        final Packet result = request.getPacket();
+        result.setCmd(Command.PULL_RESP.getCmd());
+        while(messageCount > 0 && result.getBody().length < messageSize){
+            messageCount--;
+            this.poll(result);
+        }
+        if(result.isBodyEmtpy() && isSuspend){
             pullRequestHoldService.suspend(request);
-            return null;
+            return result;
         } else{
             return result;
         }
     }
 
-    private List<Packet> pull(long messageCount, long messageSize) {
-        List<Packet> results = new ArrayList<>();
-        while(results.size() < messageCount || calculateSize(results) < messageSize){
-            Packet poll = poll();
-            if(poll == null){
-                break;
-            } else{
-                results.add(poll);
-            }
-        }
-        return results;
-    }
-
-    private Packet poll() {
-        Packet packet = retryQueue.peek();
-        if(packet != null){
+    private Packet poll(Packet packet) {
+        Packet one = retryQueue.peek();
+        if(one != null){
             retryQueue.poll();
+            ByteBuffer buffer = ByteBuffer.allocate(one.getBody().length + packet.getBody().length);
+            buffer.put(packet.getBody());
+            buffer.put(one.getBody());
+            packet.setBody(buffer.array());
         } else{
             ConsumerRecord<byte[], byte[]> record = pullQueue.poll();
             if(record != null){
-                packet = new Packet();
-                //
-                packet.setCmd(Command.PULL.getCmd());
                 Header header = new Header(record.topic(), record.partition(), record.offset(), IdService.I.getId());
-                packet.setHeader(SerializerImpl.getFastJsonSerializer().serialize(header));
-                packet.setKey(record.key());
-                packet.setValue(record.value());
+                byte[] headerInBytes = SerializerImpl.getFastJsonSerializer().serialize(header);
+                //
+                int capacity = 4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length;
+                ByteBuffer buffer = ByteBuffer.allocate(capacity + packet.getBody().length);
+
+                buffer.put(packet.getBody());
+                //
+                buffer.putInt(headerInBytes.length);
+                buffer.put(headerInBytes);
+                //
+                buffer.putInt(record.key().length);
+                buffer.put(record.key());
+                //
+                buffer.putInt(record.value().length);
+                buffer.put(record.value());
+
+                packet.setBody(buffer.array());
             }
         }
         return packet;
-    }
-
-    private long calculateSize(List<Packet> records){
-        long size = 0;
-        for(Packet record : records){
-            size = size + 1 + 1 + 8 + record.getHeader().length + record.getKey().length + record.getValue().length;
-        }
-        return size;
     }
 
     public void close(){

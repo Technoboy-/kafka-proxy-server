@@ -2,13 +2,13 @@ package com.owl.kafka.push.server.transport.handler;
 
 import com.owl.kafka.client.transport.Connection;
 import com.owl.kafka.client.transport.handler.CommonMessageHandler;
-import com.owl.kafka.client.transport.protocol.Header;
+import com.owl.kafka.client.transport.message.Message;
+import com.owl.kafka.client.transport.message.Header;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.metric.MonitorImpl;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.consumer.ProxyConsumer;
 import com.owl.kafka.push.server.biz.service.MessageHolder;
-import com.owl.kafka.serializer.SerializerImpl;
 import com.owl.kafka.util.NamedThreadFactory;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
@@ -47,10 +47,9 @@ public class AckMessageHandler extends CommonMessageHandler {
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
         LOGGER.debug("received ack msg : {}", packet);
-        Packet remove = MessageHolder.fastRemove(packet);
-        if(remove.getHeader() != null && remove.getHeader().length > 0){
-            Header header = (Header) SerializerImpl.getFastJsonSerializer().deserialize(remove.getHeader(), Header.class);
-            acknowledge(header);
+        Message remove = MessageHolder.fastRemove(packet);
+        if(remove != null){
+            acknowledge(remove.getHeader());
         } else{
             LOGGER.warn("MessageHolder not found ack opaque : {}, just ignore", packet.getOpaque());
         }

@@ -4,7 +4,7 @@ import com.owl.kafka.client.transport.codec.PacketDecoder;
 import com.owl.kafka.client.transport.codec.PacketEncoder;
 import com.owl.kafka.client.transport.handler.MessageDispatcher;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
-import com.owl.kafka.push.server.biz.registry.RegistryCenter;
+import com.owl.kafka.push.server.biz.service.InstanceHolder;
 import com.owl.kafka.push.server.transport.NettyTcpServer;
 import com.owl.kafka.push.server.transport.handler.*;
 import com.owl.kafka.client.transport.protocol.Command;
@@ -37,11 +37,11 @@ public class NettyServer extends NettyTcpServer {
 
     private MessageDispatcher newDispatcher(ProxyConsumer consumer){
         MessageDispatcher dispatcher = new MessageDispatcher();
-        dispatcher.register(Command.PING, new HeartbeatMessageHandler());
+        dispatcher.register(Command.PING, new PingMessageHandler());
         dispatcher.register(Command.UNREGISTER, new UnregisterMessageHandler());
         dispatcher.register(Command.ACK, new AckMessageHandler(consumer));
-        dispatcher.register(Command.VIEW, new ViewMessageHandler());
-        dispatcher.register(Command.PULL, new PullMessageHandler());
+        dispatcher.register(Command.VIEW_REQ, new ViewReqMessageHandler());
+        dispatcher.register(Command.PULL_REQ, new PullReqMessageHandler());
         dispatcher.register(Command.SEND_BACK, new SendBackMessageHandler());
         return dispatcher;
     }
@@ -55,7 +55,7 @@ public class NettyServer extends NettyTcpServer {
 
     @Override
     protected void afterStart() {
-        RegistryCenter.I.getServerRegistry().register();
+        InstanceHolder.I.getRegistryCenter().getServerRegistry().register();
     }
 
     protected void initNettyChannel(NioSocketChannel ch) throws Exception{
