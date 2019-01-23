@@ -112,20 +112,15 @@ public class MappedFileManager {
     }
 
     public void write(long fileFromOffset, ByteBuffer byteBuffer, Packet packet, SocketAddress socketAddress){
-        //todo
-//        long wroteOffset = fileFromOffset + byteBuffer.position();
-//        String messageId = createMessageId(idStore, host(socketAddress), wroteOffset);
-//        int length = calculate(packet);
-//        reset(store, length);
-//        store.put(packet.getVersion());
-//        store.put(packet.getCmd());
-//        store.putLong(packet.getOpaque());
-//        store.putInt(packet.getHeader().length);
-//        store.put(packet.getHeader());
-//        store.putInt(packet.getKey().length);
-//        store.put(packet.getKey());
-//        store.putInt(packet.getValue().length);
-//        store.put(packet.getValue());
+        long wroteOffset = fileFromOffset + byteBuffer.position();
+        String messageId = createMessageId(idStore, host(socketAddress), wroteOffset);
+        int length = calculate(packet);
+        reset(store, length);
+        store.put(packet.getVersion());
+        store.put(packet.getCmd());
+        store.putLong(packet.getOpaque());
+        store.putInt(packet.getBody().length);
+        store.put(packet.getBody());
 
     }
 
@@ -139,9 +134,7 @@ public class MappedFileManager {
     }
 
     private int calculate(Packet packet) {
-        //todo
-//        return 1 + 1 + 8 + 4 + packet.getHeader().length + 4 + packet.getKey().length + 4 + packet.getValue().length;
-        return 0;
+        return 1 + 1 + 8 + 4 + packet.getBody().length;
     }
 
     private void reset(ByteBuffer buffer, int limit){
