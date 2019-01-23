@@ -7,7 +7,7 @@ import com.owl.kafka.client.service.RetryPolicy;
 import com.owl.kafka.client.transport.Connection;
 import com.owl.kafka.client.transport.exceptions.ChannelInactiveException;
 import com.owl.kafka.client.transport.protocol.Command;
-import com.owl.kafka.client.transport.protocol.Header;
+import com.owl.kafka.client.transport.message.Header;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.push.server.biz.bo.ControlResult;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;

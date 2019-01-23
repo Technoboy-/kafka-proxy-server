@@ -3,7 +3,7 @@ package com.owl.kafka.push.server.transport.handler;
 import com.owl.kafka.client.transport.Connection;
 import com.owl.kafka.client.transport.handler.CommonMessageHandler;
 import com.owl.kafka.client.transport.message.Message;
-import com.owl.kafka.client.transport.protocol.Header;
+import com.owl.kafka.client.transport.message.Header;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.client.util.MessageCodec;
 import com.owl.kafka.push.server.biz.pull.PullCenter;

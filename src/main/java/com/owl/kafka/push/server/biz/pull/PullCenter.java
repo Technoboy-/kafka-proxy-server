@@ -1,23 +1,18 @@
 package com.owl.kafka.push.server.biz.pull;
 
 import com.owl.kafka.client.service.IdService;
-import com.owl.kafka.client.transport.message.Message;
 import com.owl.kafka.client.transport.protocol.Command;
-import com.owl.kafka.client.transport.protocol.Header;
+import com.owl.kafka.client.transport.message.Header;
 import com.owl.kafka.client.transport.protocol.Packet;
-import com.owl.kafka.client.util.Packets;
 import com.owl.kafka.push.server.biz.bo.ServerConfigs;
 import com.owl.kafka.push.server.biz.service.PullRequestHoldService;
 import com.owl.kafka.push.server.biz.bo.PullRequest;
 import com.owl.kafka.serializer.SerializerImpl;
-import com.owl.kafka.util.CollectionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
