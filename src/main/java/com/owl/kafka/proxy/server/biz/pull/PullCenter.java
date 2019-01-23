@@ -49,7 +49,7 @@ public class PullCenter{
         long messageCount = pullMessageCount;
         final Packet result = request.getPacket();
         result.setCmd(Command.PULL_RESP.getCmd());
-        while(messageCount > 0 && result.getBodyLength() < messageSize * messageCount){
+        while(messageCount > 0 && result.getBodyLength() < messageSize * pullMessageCount){
             messageCount--;
             if(!this.poll(result)){
                 break;
