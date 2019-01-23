@@ -41,6 +41,7 @@ public class PullCenter{
 
     public void putMessage(ConsumerRecord<byte[], byte[]> record) throws InterruptedException{
         this.pullQueue.put(record);
+        //TODO消息满了情况、
         this.pullRequestHoldService.notifyMessageArriving();
     }
 
@@ -49,16 +50,17 @@ public class PullCenter{
     }
 
     public Packet pull(PullRequest request, boolean isSuspend) {
-        int messageCount = 1;
+        int messageCount = 2;
         long messageSize = singleMessageSize * messageCount;
         final Packet result = request.getPacket();
+        result.setCmd(Command.PULL_RESP.getCmd());
         while(messageCount > 0 && result.getBody().length < messageSize){
             messageCount--;
             this.poll(result);
         }
-        if(result.getBody().length == 0 && isSuspend){
+        if(result.isBodyEmtpy() && isSuspend){
             pullRequestHoldService.suspend(request);
-            return null;
+            return result;
         } else{
             return result;
         }

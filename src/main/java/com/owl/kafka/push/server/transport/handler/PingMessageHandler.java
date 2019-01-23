@@ -19,7 +19,7 @@ public class PingMessageHandler extends CommonMessageHandler {
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
         if(LOGGER.isDebugEnabled()){
-            LOGGER.debug("received heartbeat : {}, from : {}", packet, NetUtils.getRemoteAddress(connection.getChannel()));
+            LOGGER.debug("received ping : {}, from : {}", packet, NetUtils.getRemoteAddress(connection.getChannel()));
         }
         connection.send(Packets.pong());
         InstanceHolder.I.getRegistryCenter().getClientRegistry().register(connection);

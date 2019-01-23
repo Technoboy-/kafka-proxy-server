@@ -26,10 +26,9 @@ public class PullReqMessageHandler extends CommonMessageHandler {
         PullRequest pullRequest = new PullRequest(connection, packet, 15 * 1000);
         Packet result = PullCenter.I.pull(pullRequest, isSuspend);
         //
-        if(result != null){
+        if(!result.isBodyEmtpy()){
             try {
                 connection.send(result);
-                //ecord.setOpaque(packet.getOpaque());
             } catch (ChannelInactiveException ex){
                 PullCenter.I.reputMessage(result);
             }

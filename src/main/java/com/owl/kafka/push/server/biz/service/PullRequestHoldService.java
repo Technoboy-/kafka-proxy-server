@@ -3,14 +3,12 @@ package com.owl.kafka.push.server.biz.service;
 import com.owl.kafka.client.transport.exceptions.ChannelInactiveException;
 import com.owl.kafka.client.transport.protocol.Packet;
 import com.owl.kafka.client.util.Packets;
-import com.owl.kafka.push.server.biz.pull.PullCenter;
 import com.owl.kafka.push.server.biz.bo.PullRequest;
-import com.owl.kafka.util.CollectionUtils;
+import com.owl.kafka.push.server.biz.pull.PullCenter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -77,7 +75,7 @@ public class PullRequestHoldService {
     private boolean executeWhenWakeup(PullRequest request, Packet result){
         boolean execute = false;
         try {
-            if(result != null){
+            if(!result.isBodyEmtpy()){
                 request.getConnection().send(result);
                 execute = true;
             } else if(System.currentTimeMillis() > (request.getSuspendTimestamp() + request.getTimeoutMs())){
@@ -85,7 +83,7 @@ public class PullRequestHoldService {
                 execute = true;
             }
         } catch (ChannelInactiveException e) {
-            //Ignore
+            execute = true;
         }
         return execute;
     }
