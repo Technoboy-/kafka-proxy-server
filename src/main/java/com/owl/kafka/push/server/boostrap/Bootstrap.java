@@ -9,8 +9,8 @@ import com.owl.kafka.push.server.biz.push.PushServer;
 public class Bootstrap {
 
     public static void main(String[] args) {
-        startPullServer();
-//        startPushServer();
+//        startPullServer();
+        startPushServer();
     }
 
     private static void startPullServer(){
