@@ -1,6 +1,7 @@
 package com.owl.kafka.proxy.server.biz.service;
 
-import com.owl.kafka.util.NamedThreadFactory;
+
+import com.owl.kafka.client.util.NamedThreadFactory;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

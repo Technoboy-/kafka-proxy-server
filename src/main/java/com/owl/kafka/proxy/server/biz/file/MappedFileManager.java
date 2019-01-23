@@ -1,6 +1,6 @@
 package com.owl.kafka.proxy.server.biz.file;
 
-import com.owl.kafka.proxy.transport.protocol.Packet;
+import com.owl.kafka.client.proxy.transport.protocol.Packet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

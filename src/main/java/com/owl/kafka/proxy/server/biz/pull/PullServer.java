@@ -1,15 +1,16 @@
 package com.owl.kafka.proxy.server.biz.pull;
 
+import com.owl.kafka.client.consumer.ConsumerConfig;
+import com.owl.kafka.client.consumer.service.MessageListenerService;
+import com.owl.kafka.client.proxy.zookeeper.KafkaZookeeperConfig;
+import com.owl.kafka.client.util.StringUtils;
 import com.owl.kafka.proxy.server.biz.NettyServer;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.biz.registry.RegistryCenter;
 import com.owl.kafka.proxy.server.biz.service.DLQService;
 import com.owl.kafka.proxy.server.consumer.AcknowledgeMessageListenerPullService;
 import com.owl.kafka.proxy.server.consumer.ProxyConsumer;
-import com.owl.kafka.proxy.zookeeper.KafkaZookeeperConfig;
-import com.owl.kafka.consumer.ConsumerConfig;
-import com.owl.kafka.consumer.service.MessageListenerService;
-import com.owl.kafka.util.StringUtils;
+
 
 /**
  * @Author: Tboy

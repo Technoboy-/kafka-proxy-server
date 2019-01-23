@@ -1,9 +1,9 @@
 package com.owl.kafka.proxy.server.biz.registry;
 
+import com.owl.kafka.client.proxy.service.RegistryService;
+import com.owl.kafka.client.proxy.zookeeper.ZookeeperClient;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.biz.service.InstanceHolder;
-import com.owl.kafka.proxy.service.RegistryService;
-import com.owl.kafka.proxy.zookeeper.ZookeeperClient;
 
 /**
  * @Author: Tboy

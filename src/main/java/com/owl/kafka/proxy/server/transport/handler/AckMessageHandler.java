@@ -1,15 +1,16 @@
 package com.owl.kafka.proxy.server.transport.handler;
 
-import com.owl.kafka.proxy.transport.Connection;
-import com.owl.kafka.proxy.transport.handler.CommonMessageHandler;
-import com.owl.kafka.proxy.transport.message.Message;
-import com.owl.kafka.proxy.transport.message.Header;
-import com.owl.kafka.proxy.transport.protocol.Packet;
-import com.owl.kafka.metric.MonitorImpl;
+
+import com.owl.kafka.client.metric.MonitorImpl;
+import com.owl.kafka.client.proxy.transport.Connection;
+import com.owl.kafka.client.proxy.transport.handler.CommonMessageHandler;
+import com.owl.kafka.client.proxy.transport.message.Header;
+import com.owl.kafka.client.proxy.transport.message.Message;
+import com.owl.kafka.client.proxy.transport.protocol.Packet;
+import com.owl.kafka.client.util.NamedThreadFactory;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.consumer.ProxyConsumer;
 import com.owl.kafka.proxy.server.biz.service.MessageHolder;
-import com.owl.kafka.util.NamedThreadFactory;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;

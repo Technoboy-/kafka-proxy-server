@@ -1,9 +1,10 @@
 package com.owl.kafka.proxy.server.biz.bo;
 
-import com.owl.kafka.proxy.ConfigLoader;
-import com.owl.kafka.util.Constants;
-import com.owl.kafka.util.Preconditions;
-import com.owl.kafka.util.StringUtils;
+
+import com.owl.kafka.client.proxy.ConfigLoader;
+import com.owl.kafka.client.util.Constants;
+import com.owl.kafka.client.util.Preconditions;
+import com.owl.kafka.client.util.StringUtils;
 
 /**
  * @Author: Tboy

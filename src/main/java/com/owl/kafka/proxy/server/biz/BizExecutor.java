@@ -1,8 +1,8 @@
 package com.owl.kafka.proxy.server.biz;
 
-import com.owl.kafka.util.CallerWaitPolicy;
-import com.owl.kafka.util.Constants;
-import com.owl.kafka.util.NamedThreadFactory;
+import com.owl.kafka.client.util.CallerWaitPolicy;
+import com.owl.kafka.client.util.Constants;
+import com.owl.kafka.client.util.NamedThreadFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;

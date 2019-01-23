@@ -1,14 +1,15 @@
 package com.owl.kafka.proxy.server.biz.service;
 
+import com.owl.kafka.client.consumer.Record;
+import com.owl.kafka.client.proxy.transport.message.Message;
+import com.owl.kafka.client.proxy.transport.protocol.Packet;
+import com.owl.kafka.client.proxy.util.MessageCodec;
+import com.owl.kafka.client.util.Preconditions;
 import com.owl.kafka.proxy.server.biz.bo.ResendPacket;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.consumer.DLQConsumer;
-import com.owl.kafka.proxy.transport.message.Message;
-import com.owl.kafka.proxy.transport.protocol.Packet;
-import com.owl.kafka.proxy.util.MessageCodec;
-import com.owl.kafka.consumer.Record;
+
 import com.owl.kafka.proxy.server.consumer.ProxyConsumer;
-import com.owl.kafka.util.Preconditions;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.Producer;

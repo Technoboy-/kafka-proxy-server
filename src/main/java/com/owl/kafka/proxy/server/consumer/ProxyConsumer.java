@@ -1,13 +1,13 @@
 package com.owl.kafka.proxy.server.consumer;
 
-import com.owl.kafka.proxy.zookeeper.KafkaZookeeperConfig;
-import com.owl.kafka.util.CollectionUtils;
-import com.owl.kafka.util.Preconditions;
-import com.owl.kafka.util.StringUtils;
-import com.owl.kafka.consumer.ConsumerConfig;
-import com.owl.kafka.consumer.exceptions.TopicNotExistException;
-import com.owl.kafka.consumer.service.MessageListenerService;
-import com.owl.kafka.metric.MonitorImpl;
+import com.owl.kafka.client.consumer.ConsumerConfig;
+import com.owl.kafka.client.consumer.exceptions.TopicNotExistException;
+import com.owl.kafka.client.consumer.service.MessageListenerService;
+import com.owl.kafka.client.metric.MonitorImpl;
+import com.owl.kafka.client.proxy.zookeeper.KafkaZookeeperConfig;
+import com.owl.kafka.client.util.CollectionUtils;
+import com.owl.kafka.client.util.Preconditions;
+import com.owl.kafka.client.util.StringUtils;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
@@ -40,7 +40,7 @@ public class ProxyConsumer<K, V> implements Runnable{
 
         // KAFKA 0.11 later version.
         if(configs.get("partition.assignment.strategy") == null){
-            configs.put("partition.assignment.strategy", "com.owl.kafka.consumer.assignor.CheckTopicStickyAssignor");
+            configs.put("partition.assignment.strategy", "com.owl.kafka.client.consumer.assignor.CheckTopicStickyAssignor");
         }
         String bootstrapServers = configs.getKafkaServers();
         if(StringUtils.isBlank(bootstrapServers)){

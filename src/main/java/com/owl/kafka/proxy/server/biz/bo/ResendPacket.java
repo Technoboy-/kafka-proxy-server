@@ -1,6 +1,6 @@
 package com.owl.kafka.proxy.server.biz.bo;
 
-import com.owl.kafka.proxy.transport.protocol.Packet;
+import com.owl.kafka.client.proxy.transport.protocol.Packet;
 import com.owl.kafka.proxy.server.biz.service.SystemClock;
 
 import java.util.Objects;

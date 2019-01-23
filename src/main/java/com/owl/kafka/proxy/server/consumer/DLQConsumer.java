@@ -1,12 +1,13 @@
 package com.owl.kafka.proxy.server.consumer;
 
-import com.owl.kafka.proxy.server.biz.service.LeaderElectionService;
-import com.owl.kafka.proxy.service.RegisterMetadata;
-import com.owl.kafka.proxy.transport.Address;
-import com.owl.kafka.proxy.zookeeper.ZookeeperClient;
+
+import com.owl.kafka.client.proxy.service.RegisterMetadata;
+import com.owl.kafka.client.proxy.transport.Address;
+import com.owl.kafka.client.proxy.zookeeper.ZookeeperClient;
+import com.owl.kafka.client.util.NetUtils;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.biz.service.InstanceHolder;
-import com.owl.kafka.util.NetUtils;
+import com.owl.kafka.proxy.server.biz.service.LeaderElectionService;
 import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -70,7 +71,7 @@ public class DLQConsumer implements LeaderLatchListener, Runnable {
         consumerConfigs.put("group.id", groupId);
         consumerConfigs.put("fetch.max.bytes", 10 * 1024 * 1024); //10m for a request, only fetch little record
         consumerConfigs.put("enable.auto.commit", true);
-        consumerConfigs.put("partition.assignment.strategy", "com.owl.kafka.consumer.assignor.CheckTopicStickyAssignor");
+        consumerConfigs.put("partition.assignment.strategy", "com.owl.kafka.client.consumer.assignor.CheckTopicStickyAssignor");
         this.consumer = new KafkaConsumer(consumerConfigs, new ByteArrayDeserializer(), new ByteArrayDeserializer());
         this.consumer.subscribe(Arrays.asList(topic));
     }
