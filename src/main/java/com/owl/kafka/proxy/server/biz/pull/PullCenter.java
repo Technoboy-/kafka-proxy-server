@@ -41,8 +41,6 @@ public class PullCenter{
 
     private final PullRequestHoldService pullRequestHoldService = new PullRequestHoldService();
 
-    private final ByteBufAllocator allocator = new PooledByteBufAllocator(true);
-
     public void putMessage(ConsumerRecord<byte[], byte[]> record) throws InterruptedException{
         this.pullQueue.put(record);
         this.pullRequestHoldService.notifyMessageArriving();
@@ -73,14 +71,10 @@ public class PullCenter{
         Packet one = retryQueue.peek();
         if(one != null){
             retryQueue.poll();
-            ByteBuf buffer = allocator.directBuffer(one.getBody().length + packet.getBody().length);
-            try {
-                buffer.writeBytes(packet.getBody());
-                buffer.writeBytes(one.getBody());
-                packet.setBody(buffer.array());
-            } finally {
-                buffer.release();
-            }
+            ByteBuffer buffer = ByteBuffer.allocate(one.getBody().length + packet.getBody().length);
+            buffer.put(packet.getBody());
+            buffer.put(one.getBody());
+            packet.setBody(buffer.array());
             polled = true;
         } else{
             ConsumerRecord<byte[], byte[]> record = pullQueue.poll();
@@ -90,20 +84,17 @@ public class PullCenter{
                 byte[] headerInBytes = SerializerImpl.getFastJsonSerializer().serialize(header);
                 //
                 int capacity = 4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length;
-                ByteBuf buffer = allocator.directBuffer(capacity + packet.getBody().length);
-                try {
-                    buffer.writeBytes(packet.getBody());
-                    buffer.writeInt(headerInBytes.length);
-                    buffer.writeBytes(headerInBytes);
-                    buffer.writeInt(record.key().length);
-                    buffer.writeBytes(record.key());
-                    buffer.writeInt(record.value().length);
-                    buffer.writeBytes(record.value());
-                    //
-                    packet.setBody(buffer.array());
-                } finally {
-                    buffer.release();
-                }
+                ByteBuffer buffer = ByteBuffer.allocate(capacity + packet.getBody().length);
+
+                buffer.put(packet.getBody());
+                buffer.putInt(headerInBytes.length);
+                buffer.put(headerInBytes);
+                buffer.putInt(record.key().length);
+                buffer.put(record.key());
+                buffer.putInt(record.value().length);
+                buffer.put(record.value());
+                //
+                packet.setBody(buffer.array());
                 polled = true;
             }
         }
