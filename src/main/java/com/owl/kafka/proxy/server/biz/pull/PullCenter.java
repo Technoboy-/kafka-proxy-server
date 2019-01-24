@@ -74,10 +74,13 @@ public class PullCenter{
         if(one != null){
             retryQueue.poll();
             ByteBuf buffer = allocator.directBuffer(one.getBody().length + packet.getBody().length);
-            buffer.writeBytes(packet.getBody());
-            buffer.writeBytes(one.getBody());
-            packet.setBody(buffer.array());
-            buffer.release();
+            try {
+                buffer.writeBytes(packet.getBody());
+                buffer.writeBytes(one.getBody());
+                packet.setBody(buffer.array());
+            } finally {
+                buffer.release();
+            }
             polled = true;
         } else{
             ConsumerRecord<byte[], byte[]> record = pullQueue.poll();
@@ -88,20 +91,19 @@ public class PullCenter{
                 //
                 int capacity = 4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length;
                 ByteBuf buffer = allocator.directBuffer(capacity + packet.getBody().length);
-                //
-                buffer.writeBytes(packet.getBody());
-                //
-                buffer.writeInt(headerInBytes.length);
-                buffer.writeBytes(headerInBytes);
-                //
-                buffer.writeInt(record.key().length);
-                buffer.writeBytes(record.key());
-                //
-                buffer.writeInt(record.value().length);
-                buffer.writeBytes(record.value());
-                //
-                packet.setBody(buffer.array());
-                buffer.release();
+                try {
+                    buffer.writeBytes(packet.getBody());
+                    buffer.writeInt(headerInBytes.length);
+                    buffer.writeBytes(headerInBytes);
+                    buffer.writeInt(record.key().length);
+                    buffer.writeBytes(record.key());
+                    buffer.writeInt(record.value().length);
+                    buffer.writeBytes(record.value());
+                    //
+                    packet.setBody(buffer.array());
+                } finally {
+                    buffer.release();
+                }
                 polled = true;
             }
         }
