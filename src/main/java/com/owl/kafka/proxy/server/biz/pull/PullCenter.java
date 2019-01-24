@@ -9,6 +9,10 @@ import com.owl.kafka.client.serializer.SerializerImpl;
 import com.owl.kafka.proxy.server.biz.bo.PullRequest;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.biz.service.PullRequestHoldService;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.util.ReferenceCountUtil;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +40,8 @@ public class PullCenter{
     private final long messageSize = ServerConfigs.I.getServerPullMessageSize();
 
     private final PullRequestHoldService pullRequestHoldService = new PullRequestHoldService();
+
+    private final ByteBufAllocator allocator = new PooledByteBufAllocator(true);
 
     public void putMessage(ConsumerRecord<byte[], byte[]> record) throws InterruptedException{
         this.pullQueue.put(record);
@@ -67,10 +73,11 @@ public class PullCenter{
         Packet one = retryQueue.peek();
         if(one != null){
             retryQueue.poll();
-            ByteBuffer buffer = ByteBuffer.allocate(one.getBody().length + packet.getBody().length);
-            buffer.put(packet.getBody());
-            buffer.put(one.getBody());
+            ByteBuf buffer = allocator.directBuffer(one.getBody().length + packet.getBody().length);
+            buffer.writeBytes(packet.getBody());
+            buffer.writeBytes(one.getBody());
             packet.setBody(buffer.array());
+            buffer.release();
             polled = true;
         } else{
             ConsumerRecord<byte[], byte[]> record = pullQueue.poll();
@@ -80,20 +87,21 @@ public class PullCenter{
                 byte[] headerInBytes = SerializerImpl.getFastJsonSerializer().serialize(header);
                 //
                 int capacity = 4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length;
-                ByteBuffer buffer = ByteBuffer.allocate(capacity + packet.getBody().length);
-
-                buffer.put(packet.getBody());
+                ByteBuf buffer = allocator.directBuffer(capacity + packet.getBody().length);
                 //
-                buffer.putInt(headerInBytes.length);
-                buffer.put(headerInBytes);
+                buffer.writeBytes(packet.getBody());
                 //
-                buffer.putInt(record.key().length);
-                buffer.put(record.key());
+                buffer.writeInt(headerInBytes.length);
+                buffer.writeBytes(headerInBytes);
                 //
-                buffer.putInt(record.value().length);
-                buffer.put(record.value());
-
+                buffer.writeInt(record.key().length);
+                buffer.writeBytes(record.key());
+                //
+                buffer.writeInt(record.value().length);
+                buffer.writeBytes(record.value());
+                //
                 packet.setBody(buffer.array());
+                buffer.release();
                 polled = true;
             }
         }
