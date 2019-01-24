@@ -118,6 +118,6 @@ public class ServerConfigs extends ConfigLoader {
     }
 
     public int getServerRepostCount(){
-        return getInt(SERVER_REPOST_COUNT, 10);
+        return getInt(SERVER_REPOST_COUNT, 5);
     }
 }

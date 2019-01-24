@@ -1,7 +1,9 @@
 package com.owl.kafka.proxy.server.biz.service;
 
 import com.owl.kafka.client.proxy.transport.exceptions.ChannelInactiveException;
+import com.owl.kafka.client.proxy.transport.message.Message;
 import com.owl.kafka.client.proxy.transport.protocol.Packet;
+import com.owl.kafka.client.proxy.util.MessageCodec;
 import com.owl.kafka.proxy.server.biz.bo.ResendPacket;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.biz.push.PushCenter;
@@ -54,7 +56,8 @@ public class DefaultFixedTimeRepushPolicy implements RepushPolicy<Packet>, Runna
                 }
                 long now = SystemClock.millisClock().now();
                 if(first.getRepost() >= reposts){
-                    MessageHolder.fastRemove(new Packet(first.getMsgId()));
+                    Message message = MessageCodec.decode(first.getPacket().getBody());
+                    MessageHolder.fastRemove(message);
                     LOGGER.warn("packet repost fail ", first);
                     InstanceHolder.I.getDLQService().write(first);
                     continue;

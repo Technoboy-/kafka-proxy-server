@@ -55,18 +55,17 @@ public class MessageHolder {
         }
     }
 
-    public static Message fastRemove(Packet packet){
-        Message message = null;
+    public static boolean fastRemove(Message message){
+        boolean result;
         lock.writeLock().lock();
         try {
-            message = MessageCodec.decode(packet.getBody());
-            MSG_QUEUE.remove(new ResendPacket(message.getHeader().getMsgId()));
+            result = MSG_QUEUE.remove(new ResendPacket(message.getHeader().getMsgId()));
             FastResendMessage frm = MSG_MAPPER.remove(message.getHeader().getMsgId());
             if(frm != null){
                 COUNT.decrementAndGet();
                 MEMORY_SIZE.addAndGet(frm.getSize()*(-1));
             }
-            return message;
+            return result;
         } finally {
             lock.writeLock().unlock();
         }

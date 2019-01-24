@@ -58,7 +58,8 @@ public class ProxyConsumer<K, V> implements Runnable{
 
     public void start() {
 
-        Preconditions.checkArgument(CollectionUtils.isEmpty(configs.getTopicPartitions()), "topicPartition is not support in push server");
+        Preconditions.checkArgument(!configs.isAutoCommit(), "autCommit must be false");
+        Preconditions.checkArgument(CollectionUtils.isEmpty(configs.getTopicPartitions()), "topicPartition is not support");
         Preconditions.checkArgument(messageListenerService != null, "MessageListenerService is null");
 
         if (start.compareAndSet(false, true)) {

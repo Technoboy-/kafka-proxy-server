@@ -1,6 +1,7 @@
 package com.owl.kafka.proxy.server.biz.pull;
 
 import com.owl.kafka.client.proxy.service.IdService;
+import com.owl.kafka.client.proxy.service.PullStatus;
 import com.owl.kafka.client.proxy.transport.message.Header;
 import com.owl.kafka.client.proxy.transport.protocol.Command;
 import com.owl.kafka.client.proxy.transport.protocol.Packet;
@@ -74,7 +75,8 @@ public class PullCenter{
         } else{
             ConsumerRecord<byte[], byte[]> record = pullQueue.poll();
             if(record != null){
-                Header header = new Header(record.topic(), record.partition(), record.offset(), IdService.I.getId());
+                Header header = new Header(record.topic(), record.partition(), record.offset(),
+                        IdService.I.getId(), PullStatus.FOUND.getStatus());
                 byte[] headerInBytes = SerializerImpl.getFastJsonSerializer().serialize(header);
                 //
                 int capacity = 4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length;

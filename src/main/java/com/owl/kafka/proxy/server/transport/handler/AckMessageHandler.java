@@ -7,6 +7,7 @@ import com.owl.kafka.client.proxy.transport.handler.CommonMessageHandler;
 import com.owl.kafka.client.proxy.transport.message.Header;
 import com.owl.kafka.client.proxy.transport.message.Message;
 import com.owl.kafka.client.proxy.transport.protocol.Packet;
+import com.owl.kafka.client.proxy.util.MessageCodec;
 import com.owl.kafka.client.util.NamedThreadFactory;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.consumer.ProxyConsumer;
@@ -47,12 +48,26 @@ public class AckMessageHandler extends CommonMessageHandler {
 
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
-        LOGGER.debug("received ack msg : {}", packet);
-        Message remove = MessageHolder.fastRemove(packet);
-        if(remove != null){
-            acknowledge(remove.getHeader());
-        } else{
-            LOGGER.warn("MessageHolder not found ack opaque : {}, just ignore", packet.getOpaque());
+        Message message = MessageCodec.decode(packet.getBody());
+        Header.Sign sign = Header.Sign.of(message.getHeader().getSign());
+        if(sign == null){
+            LOGGER.error("sign is empty, opaque : {}, message : {}", packet.getOpaque(),message);
+            return;
+        }
+        switch (sign){
+            case PUSH:
+                LOGGER.debug("received push ack msg : {}", message);
+                acknowledge(message.getHeader());
+                boolean result = MessageHolder.fastRemove(message);
+                if(!result){
+                    LOGGER.warn("MessageHolder not found ack opaque : {}, just ignore", packet.getOpaque());
+                }
+                break;
+            case PULL:
+                LOGGER.debug("received pull ack msg : {}", message);
+                acknowledge(message.getHeader());
+                break;
+
         }
     }
 
