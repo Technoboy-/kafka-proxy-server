@@ -41,6 +41,8 @@ public class PullCenter{
 
     private final PullRequestHoldService pullRequestHoldService = new PullRequestHoldService();
 
+    private final PooledByteBufAllocator allocator = new PooledByteBufAllocator(false);
+
     public void putMessage(ConsumerRecord<byte[], byte[]> record) throws InterruptedException{
         this.pullQueue.put(record);
         this.pullRequestHoldService.notifyMessageArriving();
@@ -85,6 +87,10 @@ public class PullCenter{
                 //
                 int capacity = 4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length;
                 ByteBuffer buffer = ByteBuffer.allocate(capacity + packet.getBody().length);
+
+                ByteBuf buf = allocator.heapBuffer(2);
+
+                buf.release();
 
                 buffer.put(packet.getBody());
                 buffer.putInt(headerInBytes.length);

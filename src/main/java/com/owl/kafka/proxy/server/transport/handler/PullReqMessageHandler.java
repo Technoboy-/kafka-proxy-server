@@ -7,6 +7,8 @@ import com.owl.kafka.client.proxy.transport.protocol.Packet;
 import com.owl.kafka.client.util.NetUtils;
 import com.owl.kafka.proxy.server.biz.bo.PullRequest;
 import com.owl.kafka.proxy.server.biz.pull.PullCenter;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +30,12 @@ public class PullReqMessageHandler extends CommonMessageHandler {
         //
         if(!result.isBodyEmtpy()){
             try {
-                connection.send(result);
+                connection.send(result, new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) throws Exception {
+                        //
+                    }
+                });
             } catch (ChannelInactiveException ex){
                 PullCenter.I.reputMessage(result);
             }
