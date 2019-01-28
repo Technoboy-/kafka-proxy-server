@@ -27,9 +27,9 @@
 - Maven依赖:
 ```xml
 <dependency>
-<groupId>com.owl.kafka</groupId>
-<artifactId>kafka-proxy-server</artifactId>
-<version>1.0.0-SNAPSHOT</version>
+    <groupId>com.owl.kafka</groupId>
+    <artifactId>kafka-proxy-server</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -45,7 +45,6 @@ src/main/resources下的proxy-server.properties为代理服务器的配置文件
 | server.port                     | proxy-server监听consumer的端口          |
 | server.commit.offset.interval   | proxy-server提交offset的间隔时间         |
 | server.commit.offset.batch.size | proxy-server提交offset的批次大小         |
-| 
 ## 五. 关于DLQ
 
 - 原生的kafka不支持消息的重复投递以及多次投递后进入DLQ的功能。proxy-server下推消息后，如果Ns(N=3默认)后未收到ack，将重复投递，共投递N次(N=5默认)。N次消费后未收到ack后，将失败的消息写入kafka的主题为<topic>-dlq中。
