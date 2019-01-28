@@ -31,8 +31,7 @@
 </dependency>
 ```
 
-- proxy-server配置
-src/main/resources下的proxy-server.properties为代理服务器的配置文件。
+- 配置信息在src/main/resources下的proxy-server.properties。
 <table>
     <tr>
         <th>参数</th>
@@ -55,10 +54,6 @@ src/main/resources下的proxy-server.properties为代理服务器的配置文件
          <th>proxy-server消费的topic</th>
     </tr>
     <tr>
-         <th>server.zookeeper.server.list</th>
-         <th>proxy-server链接的zookeeper地址 </th>
-    </tr>
-    <tr>
          <th>server.queue.size</th>
          <th>proxy-server从kafka拉取多少消息到阻塞队列</th>
     </tr>
@@ -73,7 +68,11 @@ src/main/resources下的proxy-server.properties为代理服务器的配置文件
     <tr>
         <th>server.commit.offset.batch.size</th>
         <th>proxy-server提交offset的批次大小</th>
-     </tr>        
+    </tr>
+    <tr>
+        <th>zookeeper.server.list</th>
+        <th>proxy-server链接的zookeeper地址 </th>
+    </tr>     
 </table>
 
 ## 五. 关于DLQ
