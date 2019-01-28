@@ -21,9 +21,7 @@
 
 ## 四. 快速使用
 
-- 工程依赖:
-+ JDK1.7或更高版本
-+ 依赖管理工具: Maven3.x版本
+- 工程依赖: JDK1.7或更高版本
 - Maven依赖:
 ```xml
 <dependency>
@@ -35,16 +33,49 @@
 
 - proxy-server配置
 src/main/resources下的proxy-server.properties为代理服务器的配置文件。
-| 参数                             | 说明                                   |
-| --------------------------------|--------------------------------        |
-| server.kafka.server.list        | kafka的集群地址                          |
-| server.group.id                 | proxy-server的消费组信息                 |
-| server.topic                    | proxy-server消费的topic                 |
-| server.zookeeper.server.list    | proxy-server链接的zookeeper地址         |
-| server.queue.size               | proxy-server从kafka拉取多少消息到阻塞队列 |
-| server.port                     | proxy-server监听consumer的端口          |
-| server.commit.offset.interval   | proxy-server提交offset的间隔时间         |
-| server.commit.offset.batch.size | proxy-server提交offset的批次大小         |
+<table>
+    <tr>
+        <th>参数</th>
+        <th>说明</th>
+    </tr>
+    <tr>
+        <th>server.kafka.server.list</th>
+        <th>kafka的集群地址</th>
+    </tr>
+    <tr>
+        <th>server.kafka.server.list</th>
+        <th>kafka的集群地址</th>
+    </tr>
+    <tr>
+        <th>server.group.id</th>
+        <th>proxy-server的消费组信息</th>
+    </tr>
+    <tr>
+         <th>server.topic</th>
+         <th>proxy-server消费的topic</th>
+    </tr>
+    <tr>
+         <th>server.zookeeper.server.list</th>
+         <th>proxy-server链接的zookeeper地址 </th>
+    </tr>
+    <tr>
+         <th>server.queue.size</th>
+         <th>proxy-server从kafka拉取多少消息到阻塞队列</th>
+    </tr>
+    <tr>
+         <th>server.port</th>
+         <th>proxy-server监听consumer的端口</th>
+     </tr>
+     <tr>
+        <th>server.commit.offset.interval</th>
+        <th>proxy-server提交offset的间隔时间</th>
+     </tr>
+    <tr>
+        <th>server.commit.offset.batch.size</th>
+        <th>proxy-server提交offset的批次大小</th>
+     </tr>        
+</table>
+
 ## 五. 关于DLQ
 
 - 原生的kafka不支持消息的重复投递以及多次投递后进入DLQ的功能。proxy-server下推消息后，如果Ns(N=3默认)后未收到ack，将重复投递，共投递N次(N=5默认)。N次消费后未收到ack后，将失败的消息写入kafka的主题为<topic>-dlq中。
