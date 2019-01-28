@@ -119,7 +119,7 @@ public class MappedFileManager {
         store.put(packet.getVersion());
         store.put(packet.getCmd());
         store.putLong(packet.getOpaque());
-        store.putInt(packet.getBody().length);
+        store.putInt(packet.getBody().remaining());
         store.put(packet.getBody());
 
     }
@@ -134,7 +134,7 @@ public class MappedFileManager {
     }
 
     private int calculate(Packet packet) {
-        return 1 + 1 + 8 + 4 + packet.getBody().length;
+        return 1 + 1 + 8 + 4 + packet.getBody().remaining();
     }
 
     private void reset(ByteBuffer buffer, int limit){

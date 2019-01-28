@@ -1,5 +1,6 @@
 package com.owl.kafka.proxy.server.transport.handler;
 
+import com.owl.kafka.client.proxy.transport.alloc.ByteBufferPool;
 import com.owl.kafka.client.proxy.transport.Connection;
 import com.owl.kafka.client.proxy.transport.exceptions.ChannelInactiveException;
 import com.owl.kafka.client.proxy.transport.handler.CommonMessageHandler;
@@ -7,8 +8,6 @@ import com.owl.kafka.client.proxy.transport.protocol.Packet;
 import com.owl.kafka.client.util.NetUtils;
 import com.owl.kafka.proxy.server.biz.bo.PullRequest;
 import com.owl.kafka.proxy.server.biz.pull.PullCenter;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +17,8 @@ import org.slf4j.LoggerFactory;
 public class PullReqMessageHandler extends CommonMessageHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PullReqMessageHandler.class);
+
+    private final ByteBufferPool bufferPool = ByteBufferPool.DEFAULT;
 
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
@@ -30,12 +31,7 @@ public class PullReqMessageHandler extends CommonMessageHandler {
         //
         if(!result.isBodyEmtpy()){
             try {
-                connection.send(result, new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(ChannelFuture future) throws Exception {
-                        //
-                    }
-                });
+                connection.send(result);
             } catch (ChannelInactiveException ex){
                 PullCenter.I.reputMessage(result);
             }

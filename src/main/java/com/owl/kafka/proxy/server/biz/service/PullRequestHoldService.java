@@ -1,12 +1,11 @@
 package com.owl.kafka.proxy.server.biz.service;
 
+import com.owl.kafka.client.proxy.transport.alloc.ByteBufferPool;
 import com.owl.kafka.client.proxy.transport.exceptions.ChannelInactiveException;
 import com.owl.kafka.client.proxy.transport.protocol.Packet;
 import com.owl.kafka.client.proxy.util.Packets;
 import com.owl.kafka.proxy.server.biz.bo.PullRequest;
 import com.owl.kafka.proxy.server.biz.pull.PullCenter;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +26,8 @@ public class PullRequestHoldService {
     private final Thread worker;
 
     private final AtomicBoolean start = new AtomicBoolean(false);
+
+    private final ByteBufferPool bufferPool = ByteBufferPool.DEFAULT;
 
     public PullRequestHoldService(){
         this.start.compareAndSet(false, true);
@@ -81,12 +82,8 @@ public class PullRequestHoldService {
                 request.getConnection().send(result);
                 execute = true;
             } else if(System.currentTimeMillis() > (request.getSuspendTimestamp() + request.getTimeoutMs())){
-                request.getConnection().send(Packets.pullNoMsgResp(request.getPacket().getOpaque()), new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(ChannelFuture future) throws Exception {
-
-                    }
-                });
+                final Packet packet = Packets.pullNoMsgResp(request.getPacket().getOpaque());
+                request.getConnection().send(packet);
                 execute = true;
             }
         } catch (ChannelInactiveException e) {

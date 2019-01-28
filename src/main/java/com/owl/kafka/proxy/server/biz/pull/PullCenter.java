@@ -2,6 +2,7 @@ package com.owl.kafka.proxy.server.biz.pull;
 
 import com.owl.kafka.client.proxy.service.IdService;
 import com.owl.kafka.client.proxy.service.PullStatus;
+import com.owl.kafka.client.proxy.transport.alloc.ByteBufferPool;
 import com.owl.kafka.client.proxy.transport.message.Header;
 import com.owl.kafka.client.proxy.transport.protocol.Command;
 import com.owl.kafka.client.proxy.transport.protocol.Packet;
@@ -9,10 +10,6 @@ import com.owl.kafka.client.serializer.SerializerImpl;
 import com.owl.kafka.proxy.server.biz.bo.PullRequest;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.biz.service.PullRequestHoldService;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.util.ReferenceCountUtil;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +38,7 @@ public class PullCenter{
 
     private final PullRequestHoldService pullRequestHoldService = new PullRequestHoldService();
 
-    private final PooledByteBufAllocator allocator = new PooledByteBufAllocator(false);
+    private final ByteBufferPool bufferPool = ByteBufferPool.DEFAULT;
 
     public void putMessage(ConsumerRecord<byte[], byte[]> record) throws InterruptedException{
         this.pullQueue.put(record);
@@ -73,10 +70,10 @@ public class PullCenter{
         Packet one = retryQueue.peek();
         if(one != null){
             retryQueue.poll();
-            ByteBuffer buffer = ByteBuffer.allocate(one.getBody().length + packet.getBody().length);
+            ByteBuffer buffer = bufferPool.allocate(one.getBody().remaining() + packet.getBody().remaining(), false);
             buffer.put(packet.getBody());
             buffer.put(one.getBody());
-            packet.setBody(buffer.array());
+            packet.setBody(buffer);
             polled = true;
         } else{
             ConsumerRecord<byte[], byte[]> record = pullQueue.poll();
@@ -86,11 +83,7 @@ public class PullCenter{
                 byte[] headerInBytes = SerializerImpl.getFastJsonSerializer().serialize(header);
                 //
                 int capacity = 4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length;
-                ByteBuffer buffer = ByteBuffer.allocate(capacity + packet.getBody().length);
-
-                ByteBuf buf = allocator.heapBuffer(2);
-
-                buf.release();
+                ByteBuffer buffer = bufferPool.allocate(capacity + packet.getBody().remaining(), false);
 
                 buffer.put(packet.getBody());
                 buffer.putInt(headerInBytes.length);
@@ -100,7 +93,7 @@ public class PullCenter{
                 buffer.putInt(record.value().length);
                 buffer.put(record.value());
                 //
-                packet.setBody(buffer.array());
+                packet.setBody(buffer);
                 polled = true;
             }
         }

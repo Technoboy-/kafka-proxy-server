@@ -13,6 +13,8 @@ import com.owl.kafka.proxy.server.biz.service.InstanceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
+
 /**
  * @Author: Tboy
  */
@@ -33,8 +35,8 @@ public class SendBackMessageHandler extends CommonMessageHandler {
             InstanceHolder.I.getDLQService().write(header.getMsgId(), packet);
         } else{
             header.setRepost((byte)(header.getRepost() + 1));
-            byte[] body = MessageCodec.encode(message);
-            packet.setBody(body);
+            ByteBuffer buffer = MessageCodec.encode(message);
+            packet.setBody(buffer);
             PullCenter.I.reputMessage(packet);
         }
 

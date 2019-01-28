@@ -157,7 +157,7 @@ public class PushCenter implements Runnable{
             buffer.putInt(record.value().length);
             buffer.put(record.value());
             //
-            packet.setBody(buffer.array());
+            packet.setBody(buffer);
         }
         return packet;
     }
