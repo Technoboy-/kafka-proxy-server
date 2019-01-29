@@ -47,6 +47,7 @@ public class PullCenter{
 
     public void reputMessage(Packet packet) throws InterruptedException{
         this.retryQueue.put(packet);
+        this.pullRequestHoldService.notifyMessageArriving();
     }
 
     public Packet pull(PullRequest request, boolean isSuspend) {
@@ -70,7 +71,7 @@ public class PullCenter{
         Packet one = retryQueue.peek();
         if(one != null){
             retryQueue.poll();
-            ByteBuffer buffer = bufferPool.allocate(one.getBody().remaining() + packet.getBody().remaining(), false);
+            ByteBuffer buffer = bufferPool.allocate(one.getBody().capacity() + packet.getBody().capacity());
             buffer.put(packet.getBody());
             buffer.put(one.getBody());
             packet.setBody(buffer);
@@ -83,7 +84,7 @@ public class PullCenter{
                 byte[] headerInBytes = SerializerImpl.getFastJsonSerializer().serialize(header);
                 //
                 int capacity = 4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length;
-                ByteBuffer buffer = bufferPool.allocate(capacity + packet.getBody().remaining(), false);
+                ByteBuffer buffer = bufferPool.allocate(capacity + packet.getBody().capacity());
 
                 buffer.put(packet.getBody());
                 buffer.putInt(headerInBytes.length);
