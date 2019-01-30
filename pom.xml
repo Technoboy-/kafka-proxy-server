@@ -24,7 +24,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.4.Final</version>
+            <version>4.1.33.Final</version>
         </dependency>
 
         <dependency>
@@ -76,12 +76,6 @@
                     <groupId>io.netty</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.4.Final</version>
         </dependency>
 
 
