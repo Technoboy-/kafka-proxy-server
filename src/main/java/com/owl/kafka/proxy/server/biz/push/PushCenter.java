@@ -5,6 +5,7 @@ import com.owl.kafka.client.proxy.service.IdService;
 import com.owl.kafka.client.proxy.service.LoadBalance;
 import com.owl.kafka.client.proxy.service.RetryPolicy;
 import com.owl.kafka.client.proxy.transport.Connection;
+import com.owl.kafka.client.proxy.transport.alloc.ByteBufferPool;
 import com.owl.kafka.client.proxy.transport.exceptions.ChannelInactiveException;
 import com.owl.kafka.client.proxy.transport.message.Header;
 import com.owl.kafka.client.proxy.transport.protocol.Command;
@@ -13,6 +14,7 @@ import com.owl.kafka.client.serializer.SerializerImpl;
 import com.owl.kafka.proxy.server.biz.bo.ControlResult;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.biz.service.*;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -48,6 +50,8 @@ public class PushCenter implements Runnable{
     private final AtomicBoolean start = new AtomicBoolean(false);
 
     private final Thread worker;
+
+    private final ByteBufferPool bufferPool = ByteBufferPool.DEFAULT;
 
     public PushCenter(){
         this.worker = new Thread(this,"push-worker");
@@ -147,15 +151,15 @@ public class PushCenter implements Runnable{
             header.setSign(Header.Sign.PUSH.getSign());
             byte[] headerInBytes = SerializerImpl.getFastJsonSerializer().serialize(header);
             //
-            ByteBuffer buffer = ByteBuffer.allocate(4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length);
-            buffer.putInt(headerInBytes.length);
-            buffer.put(headerInBytes);
+            ByteBuf buffer = bufferPool.allocate(4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length);
+            buffer.writeInt(headerInBytes.length);
+            buffer.writeBytes(headerInBytes);
             //
-            buffer.putInt(record.key().length);
-            buffer.put(record.key());
+            buffer.writeInt(record.key().length);
+            buffer.writeBytes(record.key());
             //
-            buffer.putInt(record.value().length);
-            buffer.put(record.value());
+            buffer.writeInt(record.value().length);
+            buffer.writeBytes(record.value());
             //
             packet.setBody(buffer);
         }

@@ -10,13 +10,11 @@ import com.owl.kafka.client.serializer.SerializerImpl;
 import com.owl.kafka.proxy.server.biz.bo.PullRequest;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.biz.service.PullRequestHoldService;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.ByteBuf;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
@@ -73,9 +71,9 @@ public class PullCenter{
         Packet one = retryQueue.peek();
         if(one != null){
             retryQueue.poll();
-            ByteBuffer buffer = bufferPool.allocate(one.getBody().capacity() + packet.getBody().capacity());
-            buffer.put(packet.getBody());
-            buffer.put(one.getBody());
+            ByteBuf buffer = bufferPool.allocate(one.getBody().capacity() + packet.getBody().capacity());
+            buffer.writeBytes(packet.getBody());
+            buffer.writeBytes(one.getBody());
             packet.setBody(buffer);
             polled = true;
         } else{
@@ -86,15 +84,16 @@ public class PullCenter{
                 byte[] headerInBytes = SerializerImpl.getFastJsonSerializer().serialize(header);
                 //
                 int capacity = 4 + headerInBytes.length + 4 + record.key().length + 4 + record.value().length;
-                ByteBuffer buffer = bufferPool.allocate(capacity + packet.getBody().capacity());
+                //TODO composite bytebuffer
+                ByteBuf buffer = bufferPool.allocate(capacity + packet.getBody().capacity());
 
-                buffer.put(packet.getBody());
-                buffer.putInt(headerInBytes.length);
-                buffer.put(headerInBytes);
-                buffer.putInt(record.key().length);
-                buffer.put(record.key());
-                buffer.putInt(record.value().length);
-                buffer.put(record.value());
+                buffer.writeBytes(packet.getBody());
+                buffer.writeInt(headerInBytes.length);
+                buffer.writeBytes(headerInBytes);
+                buffer.writeInt(record.key().length);
+                buffer.writeBytes(record.key());
+                buffer.writeInt(record.value().length);
+                buffer.writeBytes(record.value());
                 //
                 packet.setBody(buffer);
                 polled = true;

@@ -1,6 +1,7 @@
 package com.owl.kafka.proxy.server.biz.file;
 
 import com.owl.kafka.client.proxy.transport.protocol.Packet;
+import io.netty.buffer.Unpooled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,8 +120,10 @@ public class MappedFileManager {
         store.put(packet.getVersion());
         store.put(packet.getCmd());
         store.putLong(packet.getOpaque());
-        store.putInt(packet.getBody().remaining());
-        store.put(packet.getBody());
+        store.putInt(packet.getBody().readableBytes());
+        ByteBuffer buffer = ByteBuffer.allocate(packet.getBody().readableBytes());
+        packet.getBody().writeBytes(buffer);
+        store.put(buffer);
 
     }
 
@@ -134,7 +137,7 @@ public class MappedFileManager {
     }
 
     private int calculate(Packet packet) {
-        return 1 + 1 + 8 + 4 + packet.getBody().remaining();
+        return 1 + 1 + 8 + 4 + packet.getBody().readableBytes();
     }
 
     private void reset(ByteBuffer buffer, int limit){

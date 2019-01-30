@@ -10,6 +10,7 @@ import com.owl.kafka.client.util.NetUtils;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
 import com.owl.kafka.proxy.server.biz.pull.PullCenter;
 import com.owl.kafka.proxy.server.biz.service.InstanceHolder;
+import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ public class SendBackMessageHandler extends CommonMessageHandler {
             InstanceHolder.I.getDLQService().write(header.getMsgId(), packet);
         } else{
             header.setRepost((byte)(header.getRepost() + 1));
-            ByteBuffer buffer = MessageCodec.encode(message);
+            ByteBuf buffer = MessageCodec.encode(message);
             packet.setBody(buffer);
             PullCenter.I.reputMessage(packet);
         }
