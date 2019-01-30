@@ -9,6 +9,8 @@ import com.owl.kafka.proxy.server.biz.pull.PullServer;
 public class Bootstrap {
 
     public static void main(String[] args) {
+//        System.setProperty("io.netty.leakDetection.level", "advanced");
+
         startPullServer();
 //        startPushServer();
     }

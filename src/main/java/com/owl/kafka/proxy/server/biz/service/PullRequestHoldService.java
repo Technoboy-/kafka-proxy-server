@@ -1,6 +1,5 @@
 package com.owl.kafka.proxy.server.biz.service;
 
-import com.owl.kafka.client.proxy.transport.alloc.ByteBufferPool;
 import com.owl.kafka.client.proxy.transport.exceptions.ChannelInactiveException;
 import com.owl.kafka.client.proxy.transport.protocol.Packet;
 import com.owl.kafka.client.proxy.util.Packets;
@@ -26,8 +25,6 @@ public class PullRequestHoldService {
     private final Thread worker;
 
     private final AtomicBoolean start = new AtomicBoolean(false);
-
-    private final ByteBufferPool bufferPool = ByteBufferPool.DEFAULT;
 
     public PullRequestHoldService(){
         this.start.compareAndSet(false, true);
@@ -87,6 +84,7 @@ public class PullRequestHoldService {
                 execute = true;
             }
         } catch (ChannelInactiveException e) {
+            LOGGER.debug("ChannelInactiveException ", e);
             execute = true;
         }
         return execute;

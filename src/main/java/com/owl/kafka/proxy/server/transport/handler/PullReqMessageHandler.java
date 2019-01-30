@@ -1,9 +1,9 @@
 package com.owl.kafka.proxy.server.transport.handler;
 
-import com.owl.kafka.client.proxy.transport.alloc.ByteBufferPool;
 import com.owl.kafka.client.proxy.transport.Connection;
 import com.owl.kafka.client.proxy.transport.exceptions.ChannelInactiveException;
 import com.owl.kafka.client.proxy.transport.handler.CommonMessageHandler;
+import com.owl.kafka.client.proxy.transport.protocol.Command;
 import com.owl.kafka.client.proxy.transport.protocol.Packet;
 import com.owl.kafka.client.util.NetUtils;
 import com.owl.kafka.proxy.server.biz.bo.PullRequest;
@@ -18,16 +18,14 @@ public class PullReqMessageHandler extends CommonMessageHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PullReqMessageHandler.class);
 
-    private final ByteBufferPool bufferPool = ByteBufferPool.DEFAULT;
-
     @Override
     public void handle(Connection connection, Packet packet) throws Exception {
         if(LOGGER.isDebugEnabled()){
             LOGGER.debug("received pull request : {}, from : {}", packet, NetUtils.getRemoteAddress(connection.getChannel()));
         }
-        final boolean isSuspend = true;
+        packet.setCmd(Command.PULL_RESP.getCmd());
         PullRequest pullRequest = new PullRequest(connection, packet, 15 * 1000);
-        Packet result = PullCenter.I.pull(pullRequest, isSuspend);
+        Packet result = PullCenter.I.pull(pullRequest, true);
         //
         if(!result.isBodyEmtpy()){
             try {
