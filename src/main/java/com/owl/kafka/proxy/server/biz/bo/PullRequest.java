@@ -64,11 +64,11 @@ public class PullRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PullRequest that = (PullRequest) o;
-        return Objects.equals(connection.getId().asLongText(), that.connection.getId().asLongText());
+        return Objects.equals(packet.getOpaque(), that.packet.getOpaque());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(connection.getId().asLongText());
+        return Objects.hash(packet.getOpaque());
     }
 }

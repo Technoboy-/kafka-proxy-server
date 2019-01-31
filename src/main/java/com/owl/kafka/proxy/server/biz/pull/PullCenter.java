@@ -8,6 +8,8 @@ import com.owl.kafka.client.proxy.transport.protocol.Packet;
 import com.owl.kafka.client.serializer.SerializerImpl;
 import com.owl.kafka.proxy.server.biz.bo.PullRequest;
 import com.owl.kafka.proxy.server.biz.bo.ServerConfigs;
+import com.owl.kafka.proxy.server.biz.service.EnhancedPullRequestHoldService;
+import com.owl.kafka.proxy.server.biz.service.EnhancedV2PullRequestHoldService;
 import com.owl.kafka.proxy.server.biz.service.PullRequestHoldService;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
@@ -36,7 +38,7 @@ public class PullCenter{
 
     private final long messageSize = ServerConfigs.I.getServerPullMessageSize();
 
-    private final PullRequestHoldService pullRequestHoldService = new PullRequestHoldService();
+    private final EnhancedV2PullRequestHoldService pullRequestHoldService = new EnhancedV2PullRequestHoldService();
 
     private final ByteBufferPool bufferPool = ByteBufferPool.DEFAULT;
 
