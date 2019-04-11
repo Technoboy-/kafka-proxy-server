@@ -3,7 +3,8 @@ package com.owl.kafka.proxy.server.consumer;
 import com.owl.kafka.client.consumer.ConsumerConfig;
 import com.owl.kafka.client.consumer.exceptions.TopicNotExistException;
 import com.owl.kafka.client.consumer.service.MessageListenerService;
-import com.owl.kafka.client.metric.MonitorImpl;
+import com.owl.kafka.client.metric.MetricsMonitor;
+import com.owl.kafka.client.metric.NoopMetricsMonitor;
 import com.owl.kafka.client.proxy.zookeeper.KafkaZookeeperConfig;
 import com.owl.kafka.client.util.CollectionUtils;
 import com.owl.kafka.client.util.Preconditions;
@@ -34,6 +35,8 @@ public class ProxyConsumer<K, V> implements Runnable{
     private final ConsumerConfig configs;
 
     private MessageListenerService messageListenerService;
+
+    private Optional<MetricsMonitor> metricsMonitor = Optional.empty();
 
     public ProxyConsumer(ConsumerConfig configs) {
         this.configs = configs;
@@ -98,8 +101,8 @@ public class ProxyConsumer<K, V> implements Runnable{
                 LOG.error(builder.toString(), ex);
                 close();
             }
-            MonitorImpl.getDefault().recordConsumePollTime(System.currentTimeMillis() - now);
-            MonitorImpl.getDefault().recordConsumePollCount(1);
+            getMetricsMonitor().recordConsumePollTime(System.currentTimeMillis() - now);
+            getMetricsMonitor().recordConsumePollCount(1);
 
             if (LOG.isTraceEnabled() && records != null && !records.isEmpty()) {
                 LOG.trace("Received: " + records.count() + " records");
@@ -109,6 +112,20 @@ public class ProxyConsumer<K, V> implements Runnable{
             }
         }
         LOG.info(worker.getName() + " stop.");
+    }
+
+    public MetricsMonitor getMetricsMonitor() {
+        if(!this.metricsMonitor.isPresent()){
+            setMetricsMonitor(new NoopMetricsMonitor());
+        }
+        return this.metricsMonitor.get();
+    }
+
+    public void setMetricsMonitor(MetricsMonitor metricsMonitor) {
+        if (this.metricsMonitor.isPresent()) {
+            throw new IllegalArgumentException("MetricsMonitor already set");
+        }
+        this.metricsMonitor = Optional.of(metricsMonitor);
     }
 
     public void commit(Map<TopicPartition, OffsetAndMetadata> highestOffsetRecords) {
@@ -134,7 +151,7 @@ public class ProxyConsumer<K, V> implements Runnable{
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Processing " + record);
             }
-            MonitorImpl.getDefault().recordConsumeRecvCount(1);
+            getMetricsMonitor().recordConsumeRecvCount(1);
             try {
                 messageListenerService.onMessage(record);
             } catch (Throwable ex) {

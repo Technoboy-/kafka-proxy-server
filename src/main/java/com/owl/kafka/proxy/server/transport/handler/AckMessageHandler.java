@@ -1,7 +1,6 @@
 package com.owl.kafka.proxy.server.transport.handler;
 
 
-import com.owl.kafka.client.metric.MonitorImpl;
 import com.owl.kafka.client.proxy.transport.Connection;
 import com.owl.kafka.client.proxy.transport.handler.CommonMessageHandler;
 import com.owl.kafka.client.proxy.transport.message.Header;
@@ -101,8 +100,8 @@ public class AckMessageHandler extends CommonMessageHandler {
             } catch (Throwable ex) {
                 LOGGER.error("Commit consumer offset error.", ex);
             } finally {
-                MonitorImpl.getDefault().recordCommitCount(1L);
-                MonitorImpl.getDefault().recordCommitTime(System.currentTimeMillis() - now);
+                consumer.getMetricsMonitor().recordCommitCount(1L);
+                consumer.getMetricsMonitor().recordCommitTime(System.currentTimeMillis() - now);
             }
         }
     }
